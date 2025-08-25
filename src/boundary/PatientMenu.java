@@ -1,0 +1,876 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package boundary;
+
+import control.PatientManager;
+import entity.Patient;
+import java.util.Scanner;
+
+/**
+ *
+ * @author yuhang
+ */
+public class PatientMenu {
+
+    private PatientManager manager;
+    private Scanner sc = new Scanner(System.in);
+    
+    public PatientMenu(PatientManager manager){
+       this.manager = manager;
+    }
+
+    public void start(){
+        int choice;
+
+        do{
+            System.out.println(Messages.PATIENT_MENU_HEADER);
+            System.out.println(Messages.PATIENT_MENU_OPTION);
+            System.out.print(Messages.PATIENT_MENU_PROMPT);
+
+            //detect if got buffer
+            while(!sc.hasNextInt()){
+                System.out.println(Messages.INVALID_NUM);
+                sc.nextLine();
+        }
+        choice = sc.nextInt();
+        sc.nextLine();  //clear buffer
+
+        switch (choice) {
+    case 1: 
+           registerPatient();
+           break;          
+    case 2:
+           manager.displayAllPatients();
+           break;
+    case 3:
+           searchPatient();
+           break;
+    case 4:
+            updatePatient();
+            break;
+    case 5:
+            deletePatient();
+            break;
+    case 6:
+            manageQueue();
+            break;
+    case 7:
+            manager.generateReports();
+            break;
+    case 8:
+            sortPatientsMenu();
+            break;
+    case 9:
+            advancedPatientOperations();
+            break;
+    case 10:
+            System.out.println("Returning to Main Menu...");
+            break;
+    default:
+            System.out.printf(Messages.INVALID_CHOICE,1,10);
+        }
+
+    }while(choice != 10);
+    
+}
+
+private void registerPatient(){
+
+    String ic;
+    String name;
+    String gender;
+    int age;
+    String phone;
+    String address;
+    String email;
+    String history;
+    
+    while(true){
+        System.out.println(Messages.ENTER_PATIENT_IC);
+        ic = sc.nextLine().trim();
+        if (!ic.matches("\\d{12}")) {
+            System.out.println(Messages.INVALID_IC);
+            continue;
+        }
+        if (manager.getPatientByIC(ic) != null) {
+            System.out.println(Messages.DUPLICATE_IC);
+            continue;
+        }
+        break;
+    }
+
+        System.out.print(Messages.ENTER_PATIENT_NAME);
+         name = sc.nextLine();
+
+         while(true){
+        System.out.print(Messages.ENTER_PATIENT_GENDER);
+         gender = sc.nextLine();
+        
+         if(!gender.equalsIgnoreCase("Male") && !gender.equalsIgnoreCase("Female")){
+               System.out.println(Messages.INVALID_INPUT);           
+            continue;
+         }
+        
+         break; 
+        }
+         
+        while(true){
+        System.out.print(Messages.ENTER_PATIENT_AGE);
+        String ageStr = sc.nextLine().trim();
+
+        try{
+            age = Integer.parseInt(ageStr);
+            if(age <= 0 || age > 120){
+                System.out.println(Messages.INVALID_AGE);
+                continue;
+            }
+            break;
+        }catch(NumberFormatException e){
+            System.out.println(Messages.INVALID_AGE);
+        }
+      }
+
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_PHONE);
+         phone = sc.nextLine().trim();
+         if(!phone.matches("\\d{12}")){
+            System.out.println(Messages.INVALID_PHONE);
+            continue;
+         }
+         break;
+    }
+
+        System.out.print(Messages.ENTER_PATIENT_ADDRESS);
+         address = sc.nextLine();
+
+        
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_EMAIL);
+         email = sc.nextLine().trim();
+        if(email.equals("-")){
+            email="";
+            break;
+        }else if(!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w+$")){
+        System.out.println(Messages.INVALID_EMAIL);
+        continue;
+        }
+        break;
+        }
+ 
+        System.out.print(Messages.ENTER_PATIENT_HISTORY);
+         history = sc.nextLine().trim();
+
+
+        boolean isSuccessfull = manager.registerPatient(ic,name, gender, age, phone, address, email, history);
+        if(isSuccessfull){
+            System.out.println(Messages.PATIENT_REGISTERED);
+        }
+    }
+
+private void searchPatient() {
+  System.out.println("Enter Patient ID or IC");
+  String keyword = sc.nextLine();
+  manager.searchPatient(keyword);
+
+}
+
+//now change the validation
+private void updatePatient() {
+    System.out.print("Enter Patient ID to update: ");
+    String id = sc.nextLine().trim();
+
+    // check whether the id exists
+    Patient existing = manager.getPatientById(id);
+    if (existing == null) {
+        System.out.println(Messages.PATIENT_NOT_FOUND);
+        return;
+    }
+
+    System.out.println("Current patient data: ");
+    System.out.println(existing);
+
+    // Input new details (press '-' to keep old value)
+    System.out.print(Messages.ENTER_PATIENT_NAME + " (Current: " + existing.getName() + ", '-' to keep): ");
+    String name = sc.nextLine().trim();
+    if (name.equals("-") || name.isEmpty()) name = existing.getName();
+
+    String gender;
+
+        while (true) {
+            System.out.print(Messages.ENTER_PATIENT_GENDER + " (Current: " + existing.getGender() + ", '-' to keep): ");
+            gender = sc.nextLine().trim();
+            if (gender.equals("-")) {
+                gender = existing.getGender();
+                break;
+            }
+            if (!gender.equalsIgnoreCase("Male") && !gender.equalsIgnoreCase("Female")) {
+                System.out.println(Messages.INVALID_INPUT);
+                continue;
+            }
+            break;
+        }
+
+      int age;
+    while(true){
+    System.out.print(Messages.ENTER_PATIENT_AGE + " (Current: " + existing.getAge() + ", '-' to keep): ");
+    String ageStr = sc.nextLine().trim();
+    if (ageStr.equals("-")) {
+        age = existing.getAge();
+        break;
+    } else {
+        try {
+            age = Integer.parseInt(ageStr);
+            if(age <=0 || age > 120){
+                System.out.println(Messages.INVALID_INPUT);
+                    continue;
+            }
+            break;
+        } catch (NumberFormatException e) {
+            System.out.println(Messages.INVALID_AGE);
+        }
+    }
+}
+
+   String phone;
+
+   while(true){
+    System.out.print(Messages.ENTER_PATIENT_PHONE + " (Current: " + existing.getPhoneNumber() + ", '-' to keep): ");
+     phone = sc.nextLine().trim();
+    if (phone.equals("-") ) 
+    {
+    phone = existing.getPhoneNumber();
+    break;
+    }else if(!phone.matches("\\d{12}")){
+        System.out.println(Messages.INVALID_PHONE);
+        continue;
+    }
+    break;
+   }
+   
+
+    System.out.print(Messages.ENTER_PATIENT_ADDRESS + " (Current: " + existing.getAddress() + ", '-' to keep): ");
+    String address = sc.nextLine().trim();
+    if (address.equals("-")) address = existing.getAddress();
+
+    String email;
+    while(true){
+    System.out.print(Messages.ENTER_PATIENT_EMAIL + " (Current: " + existing.getEmail() + ", '-' to keep): ");
+    email = sc.nextLine().trim();
+    if (email.equals("-")) 
+    {
+    email = existing.getEmail();
+    break;
+    }
+    if(!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w+$")){
+        System.out.println(Messages.INVALID_EMAIL);
+        continue;
+    }
+    break;
+}
+
+    System.out.print(Messages.ENTER_PATIENT_HISTORY + " (Current: " + existing.getMedicalHistory() + ", '-' to keep): ");
+    String history = sc.nextLine().trim();
+    if (history.equals("-")) 
+    {
+        history = existing.getMedicalHistory();
+    }
+
+    System.out.print(Messages.CONFIRM_UPDATE);
+    String confirm = sc.nextLine().trim();
+
+    if (confirm.equalsIgnoreCase("Y")) {
+        manager.updatePatient(id, existing.getIcNumber(), name, gender, age, phone, address, email, history);
+        System.out.println("Patient updated successfully.");
+    } else {
+        System.out.println(Messages.UPDATE_CANCELLED);
+    }
+}
+
+
+private void deletePatient(){
+ System.out.print("Enter Patient ID to delete:");
+ String id = sc.nextLine().trim();
+
+ Patient existing = manager.getPatientById(id);
+    if (existing == null) {
+        System.out.println(Messages.PATIENT_NOT_FOUND);
+        return;
+    }
+
+    System.out.println("Patient to be deleted:");
+    System.out.println(existing);
+
+    System.out.print(Messages.CONFIRM_DELETE);
+    String confirm = sc.nextLine().trim();
+    if(confirm.equalsIgnoreCase("Y")){
+        manager.deletePatient(id);
+    }else{
+        System.out.println(Messages.DELETE_CANCELLED);
+    }
+ 
+}
+
+private void manageQueue(){
+ int choice;
+
+ do{
+    System.out.println("\n" + Messages.FORMAT);
+        System.out.println(" PATIENT QUEUE MANAGEMENT");
+        System.out.println(Messages.FORMAT);
+        System.out.println("1. Add patient to queue (normal priority)");
+        System.out.println("2. Add patient to queue (with priority)");
+        System.out.println("3. Serve next patient");
+        System.out.println("4. View queue");
+        System.out.println("5. Remove patient from queue");
+        System.out.println("6. Check if patient is in queue");
+        System.out.println("7. Replace patient in queue");
+        System.out.println("8. Clear entire queue");
+        System.out.println("9. Back to Patient Menu");
+        System.out.print("Enter choice: ");
+
+        while(!sc.hasNextInt()){
+            System.out.println(Messages.INVALID_INPUT);
+            sc.nextLine();
+        }
+        choice = sc.nextInt();
+        sc.nextLine(); //clear buffer
+
+        switch(choice) {
+            case 1:
+                System.out.print(Messages.ENTER_PATIENT_ID);
+                String id = sc.nextLine();
+                if(manager.addPatientToQueue(id)){
+                    System.out.println("Patient added to queue.");
+                }else{
+                    System.out.println(Messages.PATIENT_NOT_FOUND);
+                }
+                break;
+
+            case 2:
+                System.out.print(Messages.ENTER_PATIENT_ID);
+                String priorityId = sc.nextLine();
+                System.out.print("Enter priority (1=highest, 5=lowest): ");
+                while(!sc.hasNextInt()){
+                    System.out.println(Messages.INVALID_INPUT);
+                    sc.nextLine();
+                }
+                int priority = sc.nextInt();
+                sc.nextLine();
+
+                if(manager.addPatientToQueueWithPriority(priorityId, priority)){
+                    System.out.println("Patient added to queue with priority " + priority + ".");
+                }else{
+                    System.out.println("Failed to add patient. Check patient ID and priority.");
+                }
+                break;
+
+            case 3:
+                Patient next = manager.serveNextPatient();
+                if(next!=null){
+                    System.out.println("Serving: " + next);
+                }else{
+                    System.out.println("Queue is empty.");
+                }
+                break;
+
+            case 4:
+                manager.displayWaitingQueue();
+                break;
+
+            case 5:
+                System.out.print("Enter Patient ID to remove from queue: ");
+                String removeId = sc.nextLine();
+                if(manager.removePatientFromQueue(removeId)){
+                    System.out.println("Patient removed from queue.");
+                }else{
+                    System.out.println("Patient not found in queue.");
+                }
+                break;
+
+            case 6:
+                System.out.print("Enter Patient ID to check: ");
+                String checkId = sc.nextLine();
+                if(manager.isPatientInQueue(checkId)){
+                    System.out.println("Patient is in the queue.");
+                }else{
+                    System.out.println("Patient is not in the queue.");
+                }
+                break;
+
+            case 7:
+                System.out.print("Enter queue position to replace: ");
+                while(!sc.hasNextInt()){
+                    System.out.println(Messages.INVALID_INPUT);
+                    sc.nextLine();
+                }
+                int position = sc.nextInt();
+                sc.nextLine();
+                System.out.print("Enter new Patient ID: ");
+                String newId = sc.nextLine();
+
+                if(manager.replacePatientInQueue(position, newId)){
+                    System.out.println("Patient replaced successfully.");
+                }else{
+                    System.out.println("Failed to replace patient. Check position and patient ID.");
+                }
+                break;
+
+            case 8:
+                System.out.print("Are you sure you want to clear the entire queue? (Y/N): ");
+                String confirm = sc.nextLine();
+                if(confirm.equalsIgnoreCase("Y")){
+                    manager.clearQueue();
+                }else{
+                    System.out.println("Queue clear cancelled.");
+                }
+                break;
+
+            case 9:
+                System.out.println("Returning to Patient Menu...");
+                break;
+
+            default:
+                System.out.printf(Messages.INVALID_CHOICE, 1, 9);
+        }
+ }while(choice != 9);
+
+}
+
+
+private void sortPatientsMenu(){
+     System.out.println("\n" + Messages.FORMAT);
+    System.out.println(" SORT & DISPLAY PATIENTS");
+    System.out.println(Messages.FORMAT);
+    System.out.println("1. Sort by Name (Forward)");
+    System.out.println("2. Sort by Age (Forward)");
+    System.out.println("3. Sort by ID (Forward)");
+    System.out.println("4. Display Patients in Reverse Order");
+    System.out.println("5. Back to Patient Menu");
+    System.out.print("Enter choice: ");
+
+    //clear buffer
+    while (!sc.hasNextInt()) {
+        System.out.println(Messages.INVALID_INPUT);
+        sc.nextLine();
+    }
+
+    int choice = sc.nextInt();
+    sc.nextLine();
+
+    switch (choice) {
+        case 1:
+            manager.sortPatientsByName();
+            manager.displayAllPatients();
+            break;
+        case 2:
+            manager.sortPatientsByAge();
+            manager.displayAllPatients();
+            break;
+        case 3:
+           manager.sortPatientsById();
+           manager.displayAllPatients();
+           break;
+        case 4:
+            manager.displayPatientsReverse();
+            break;
+        case 5:
+         System.out.println("Returning to Patient Menu...");
+            break;
+        default:
+            System.out.println("Invalid choice.");
+    }
+}
+
+// New method for advanced patient operations
+private void advancedPatientOperations() {
+    System.out.println("\n" + Messages.FORMAT);
+    System.out.println(" ADVANCED PATIENT OPERATIONS");
+    System.out.println(Messages.FORMAT);
+    System.out.println("1. Register Patient with Priority");
+    System.out.println("2. Insert Patient at Specific Position");
+    System.out.println("3. Replace Patient at Position");
+    System.out.println("4. Check if Patient Exists");
+    System.out.println("5. Get Patient Count");
+    System.out.println("6. Check if Patient List is Full");
+    System.out.println("7. Back to Patient Menu");
+    System.out.print("Enter choice: ");
+
+    while (!sc.hasNextInt()) {
+        System.out.println(Messages.INVALID_INPUT);
+        sc.nextLine();
+    }
+
+    int choice = sc.nextInt();
+    sc.nextLine();
+
+    switch (choice) {
+        // case 1:
+        //     setPriorityForExistingPatient(); 
+        //     break;
+        case 1:
+            registerPatientWithPriority();
+            break;
+        case 2:
+            insertPatientAtPosition();
+            break;
+        case 3:
+            replacePatientAtPosition();
+            break;
+        case 4:
+            checkPatientExists();
+            break;
+        case 5:
+            System.out.println("Total patients: " + manager.getPatientCount());
+            break;
+        case 6:
+            if(manager.isPatientListFull()) {
+                System.out.println("Patient list is full.");
+            } else {
+                System.out.println("Patient list is not full.");
+            }
+            break;
+        case 7:
+            System.out.println("Returning to Patient Menu...");
+            break;
+        default:
+            System.out.println("Invalid choice.");
+    }
+}
+
+// New helper methods for advanced operations
+private void registerPatientWithPriority() {
+    String ic, name, gender, phone, address, email, history;
+    int age, priority;
+
+    // Get patient details (similar to registerPatient but with priority)
+    while(true){
+        System.out.println(Messages.ENTER_PATIENT_IC);
+        ic = sc.nextLine().trim();
+        if (!ic.matches("\\d{12}")) {
+            System.out.println(Messages.INVALID_IC);
+            continue;
+        }
+        if (manager.getPatientByIC(ic) != null) {
+            System.out.println(Messages.DUPLICATE_IC);
+            continue;
+        }
+        break;
+    }
+
+    System.out.print(Messages.ENTER_PATIENT_NAME);
+    name = sc.nextLine();
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_GENDER);
+        gender = sc.nextLine();
+        if(!gender.equalsIgnoreCase("Male") && !gender.equalsIgnoreCase("Female")){
+            System.out.println(Messages.INVALID_INPUT);
+            continue;
+        }
+        break;
+    }
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_AGE);
+        String ageStr = sc.nextLine().trim();
+        try{
+            age = Integer.parseInt(ageStr);
+            if(age <= 0 || age > 120){
+                System.out.println(Messages.INVALID_AGE);
+                continue;
+            }
+            break;
+        }catch(NumberFormatException e){
+            System.out.println(Messages.INVALID_AGE);
+        }
+    }
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_PHONE);
+        phone = sc.nextLine().trim();
+        if(!phone.matches("\\d{12}")){
+            System.out.println(Messages.INVALID_PHONE);
+            continue;
+        }
+        break;
+    }
+
+    System.out.print(Messages.ENTER_PATIENT_ADDRESS);
+    address = sc.nextLine();
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_EMAIL);
+        email = sc.nextLine().trim();
+        if(email.equals("-")){
+            email="";
+            break;
+        }else if(!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w+$")){
+            System.out.println(Messages.INVALID_EMAIL);
+            continue;
+        }
+        break;
+    }
+
+    System.out.print(Messages.ENTER_PATIENT_HISTORY);
+    history = sc.nextLine().trim();
+
+    while(true){
+        System.out.print("Enter priority (1=highest, 5=lowest): ");
+        try{
+            priority = Integer.parseInt(sc.nextLine().trim());
+            if(priority < 1 || priority > 5){
+                System.out.println("Invalid priority. Must be between 1-5.");
+                continue;
+            }
+            break;
+        }catch(NumberFormatException e){
+            System.out.println("Invalid priority. Please enter a number.");
+        }
+    }
+
+    boolean isSuccessful = manager.registerPatientWithPriority(ic, name, gender, age, phone, address, email, history, priority);
+    if(isSuccessful){
+        System.out.println("Patient registered successfully with priority " + priority + ".");
+    }
+}
+
+private void insertPatientAtPosition() {
+    System.out.print("Enter position to insert patient: ");
+    while(!sc.hasNextInt()){
+        System.out.println(Messages.INVALID_INPUT);
+        sc.nextLine();
+    }
+    int position = sc.nextInt();
+    sc.nextLine();
+
+    // Get patient details
+    String ic, name, gender, phone, address, email, history;
+    int age;
+
+    while(true){
+        System.out.println(Messages.ENTER_PATIENT_IC);
+        ic = sc.nextLine().trim();
+        if (!ic.matches("\\d{12}")) {
+            System.out.println(Messages.INVALID_IC);
+            continue;
+        }
+        if (manager.getPatientByIC(ic) != null) {
+            System.out.println(Messages.DUPLICATE_IC);
+            continue;
+        }
+        break;
+    }
+
+    System.out.print(Messages.ENTER_PATIENT_NAME);
+    name = sc.nextLine();
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_GENDER);
+        gender = sc.nextLine();
+        if(!gender.equalsIgnoreCase("Male") && !gender.equalsIgnoreCase("Female")){
+            System.out.println(Messages.INVALID_INPUT);
+            continue;
+        }
+        break;
+    }
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_AGE);
+        String ageStr = sc.nextLine().trim();
+        try{
+            age = Integer.parseInt(ageStr);
+            if(age <= 0 || age > 120){
+                System.out.println(Messages.INVALID_AGE);
+                continue;
+            }
+            break;
+        }catch(NumberFormatException e){
+            System.out.println(Messages.INVALID_AGE);
+        }
+    }
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_PHONE);
+        phone = sc.nextLine().trim();
+        if(!phone.matches("\\d{12}")){
+            System.out.println(Messages.INVALID_PHONE);
+            continue;
+        }
+        break;
+    }
+
+    System.out.print(Messages.ENTER_PATIENT_ADDRESS);
+    address = sc.nextLine();
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_EMAIL);
+        email = sc.nextLine().trim();
+        if(email.equals("-")){
+            email="";
+            break;
+        }else if(!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w+$")){
+            System.out.println(Messages.INVALID_EMAIL);
+            continue;
+        }
+        break;
+    }
+
+    System.out.print(Messages.ENTER_PATIENT_HISTORY);
+    history = sc.nextLine().trim();
+
+    boolean success = manager.insertPatientAtPosition(position, ic, name, gender, age, phone, address, email, history);
+    if(success){
+        System.out.println("Patient inserted successfully at position " + position + ".");
+    } else {
+        System.out.println("Failed to insert patient. Check position or duplicate data.");
+    }
+}
+
+private void replacePatientAtPosition() {
+    System.out.print("Enter position to replace: ");
+    while(!sc.hasNextInt()){
+        System.out.println(Messages.INVALID_INPUT);
+        sc.nextLine();
+    }
+    int position = sc.nextInt();
+    sc.nextLine();
+
+    Patient currentPatient = manager.getPatientAtPosition(position);
+    if(currentPatient == null) {
+        System.out.println("No patient found at position " + position);
+        return;
+    }
+
+    System.out.println("Current patient at position " + position + ": " + currentPatient.getName());
+
+    // Get new patient details
+    String ic, name, gender, phone, address, email, history;
+    int age;
+
+    while(true){
+        System.out.println(Messages.ENTER_PATIENT_IC);
+        ic = sc.nextLine().trim();
+        if (!ic.matches("\\d{12}")) {
+            System.out.println(Messages.INVALID_IC);
+            continue;
+        }
+        break;
+    }
+
+    System.out.print(Messages.ENTER_PATIENT_NAME);
+    name = sc.nextLine();
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_GENDER);
+        gender = sc.nextLine();
+        if(!gender.equalsIgnoreCase("Male") && !gender.equalsIgnoreCase("Female")){
+            System.out.println(Messages.INVALID_INPUT);
+            continue;
+        }
+        break;
+    }
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_AGE);
+        String ageStr = sc.nextLine().trim();
+        try{
+            age = Integer.parseInt(ageStr);
+            if(age <= 0 || age > 120){
+                System.out.println(Messages.INVALID_AGE);
+                continue;
+            }
+            break;
+        }catch(NumberFormatException e){
+            System.out.println(Messages.INVALID_AGE);
+        }
+    }
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_PHONE);
+        phone = sc.nextLine().trim();
+        if(!phone.matches("\\d{12}")){
+            System.out.println(Messages.INVALID_PHONE);
+            continue;
+        }
+        break;
+    }
+
+    System.out.print(Messages.ENTER_PATIENT_ADDRESS);
+    address = sc.nextLine();
+
+    while(true){
+        System.out.print(Messages.ENTER_PATIENT_EMAIL);
+        email = sc.nextLine().trim();
+        if(email.equals("-")){
+            email="";
+            break;
+        }else if(!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w+$")){
+            System.out.println(Messages.INVALID_EMAIL);
+            continue;
+        }
+        break;
+    }
+
+    System.out.print(Messages.ENTER_PATIENT_HISTORY);
+    history = sc.nextLine().trim();
+
+    Patient newPatient = new Patient(currentPatient.getPatientId(), ic, name, gender, age, phone, address, email, history);
+    boolean success = manager.replacePatientAtPosition(position, newPatient);
+    if(success){
+        System.out.println("Patient replaced successfully at position " + position + ".");
+    } else {
+        System.out.println("Failed to replace patient.");
+    }
+}
+
+
+private void checkPatientExists() {
+    System.out.print("Enter Patient ID to check: ");
+    String id = sc.nextLine().trim();
+
+    Patient patient = manager.getPatientById(id);
+    if(patient != null) {
+        System.out.println("Patient exists: " + patient.getName());
+        if(manager.containsPatient(patient)) {
+            System.out.println("Patient is confirmed to be in the system.");
+        }
+    } else {
+        System.out.println("Patient does not exist.");
+    }
+}
+
+
+// private void setPriorityForExistingPatient(){
+//     System.out.print("Enter Patient ID or IC to reprioritize: ");
+//     String key = sc.nextLine().trim();
+
+
+// int priority;
+// while(true){
+//     System.out.print("Enter new priority (1=highest, 5=lowest):");
+//     String s = sc.nextLine().trim();
+
+//     try{
+//         priority = Integer.parseInt(s);
+//         if(priority < 1 || priority > 5){
+//             System.out.println("Invalid priority range.Please enter 1 to 5.");
+//             continue;
+//         }
+//         break;
+//     }catch(NumberFormatException e){
+//         System.out.println("Invalid priority, Please enter a number.");
+//     }
+// }
+
+// boolean isSuccessful = manager.setExistingPatientPriority(key, priority);
+
+// if (isSuccessful) {
+//     System.out.println("Priority updates for '" + key + "' to " + priority + ".");
+// }
+// }
+
+}
