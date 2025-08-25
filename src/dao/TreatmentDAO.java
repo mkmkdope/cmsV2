@@ -7,7 +7,7 @@ import entity.Patient;
 import entity.Doctor;
 import adt.ListInterface;
 import dao.PatientDAO;
-import dao.DoctorInitializer;
+import control.DoctorManager;
 import dao.ConsultationDAO;
 
 public class TreatmentDAO {
@@ -42,8 +42,15 @@ public class TreatmentDAO {
         PatientDAO patientDAO = new PatientDAO();
         ListInterface<Patient> patients = patientDAO.getAllPatients();
         
-        // Get doctors from DoctorInitializer
-        ListInterface<Doctor> doctors = DoctorInitializer.initializeSampleDoctors();
+    // Get doctors from DoctorManager instead of DoctorInitializer
+    DoctorManager doctorManager = new DoctorManager();
+    Doctor[] doctorsArray = doctorManager.getAllDoctors();
+    
+    // Convert array to list for compatibility
+    CircularDoublyLinkedList<Doctor> doctors = new CircularDoublyLinkedList<>();
+    for (Doctor doctor : doctorsArray) {
+        doctors.add(doctor);
+    }
         
         // create new consultations to ensure data consistency
         Patient p1 = patients.getEntry(1);
