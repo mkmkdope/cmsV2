@@ -8,8 +8,8 @@ public class DoctorDAO {
 
     private CircularDoublyLinkedList<Doctor> doctorList;
     private DutySchedule dutySchedule;
-    private static final int DAYS = 5;
-    private static final int MAX_SLOTS = 10;
+    private static final int DAYS = 5; // assume working days is mon-fri, sat is OT.
+    private static final int MAX_SLOTS = 10; // assume each days 10 slot of doctor is maximum.
 
     public DoctorDAO() {
         doctorList = new CircularDoublyLinkedList<>();
@@ -154,6 +154,7 @@ public class DoctorDAO {
         return success;
     }
 
+    //Not Using
     public void displayDutySchedule() {
         dutySchedule.displayWeeklySchedule();
     }
@@ -220,8 +221,8 @@ public class DoctorDAO {
 
     ////////////////////////////// Workload Report [Sorted by Duties] //////////////////////////////
 public void generateWorkloadReport() {
-        System.out.println("\n=== TARUMT CLINIC MANAGEMENT SYSTEM ===");
-        System.out.println("=== Workload Analysis Report ===");
+        System.out.println("\n--- TARUMT CLINIC MANAGEMENT SYSTEM ---");
+        System.out.println("----- Workload Analysis Report -----");
 
         System.out.println("ID    Doctor                Duties  Status      Workload %  Chart (| = 2%)");
         System.out.println("-----------------------------------------------------------------------");
@@ -270,17 +271,14 @@ public void generateWorkloadReport() {
         double averageDuties = doctors.length > 0 ? (double) totalDuties / doctors.length : 0;
 
         System.out.println("-----------------------------------------------------------------------");
-
+        System.out.println("Workload % = (Individual Duties / Total Duties) * 100%");
         System.out.printf("Total Duties: %d%n", totalDuties);
         System.out.printf("Average Duties: %.1f%n", averageDuties);
         System.out.printf("Busiest Doctor: %s (%d duties)%n", busiestDoctor, maxDuties);
-        //System.out.printf("Maximum Possible: %d%n", DAYS * MAX_SLOTS);
 
         displayWorkloadDistribution(workloads);
 
-        System.out.println("\nChart Legend: Each | represents approximately 2% of total workload");
-        System.out.println("Workload % = (Individual Duties / Total Duties) * 100%");
-        System.out.println("=== End of Workload Report ===");
+        System.out.println("\n----- End of Report -----\n");
     }
 
     private String generateBarChart(double workloadPercentage, int maxWidth) {
@@ -430,7 +428,8 @@ private int countDuties(Doctor doctor) {
     ////////////////////////////// Specialty Report ////////////////////////////// 
 
     public void generateSpecialtyReport() {
-        System.out.println("\n=== Specialty Availability Matrix ===");
+        System.out.println("\n--- TARUMT CLINIC MANAGEMENT SYSTEM ---");
+        System.out.println("----- Specialty Availability Report -----");
         System.out.println("MON TUE WED THU FRI  SPECIALTY       COVERAGE");
         System.out.println("---------------------------------------------");
 
@@ -488,7 +487,7 @@ private int countDuties(Doctor doctor) {
 
         System.out.println("---------------------------------------------");
         System.out.println("G = Fully covered  X = Understaffed  / = Partial");
-        System.out.println("=== End of Specialty Report ===");
+        System.out.println("----- End of Report -----\n");
     }
 
     private String getCoverageSymbol(SpecialtySummary summary, int day) {

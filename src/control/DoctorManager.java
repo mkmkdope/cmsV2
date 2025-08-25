@@ -14,23 +14,24 @@ public class DoctorManager {
     public Doctor[] getAllDoctors() {
         return doctorDAO.getAllDoctors();
     }
-// Original method with default duty schedule
+
+    //default duty schedule
     public boolean addDoctor(String doctorId, String name, String specialization) {
-        return addDoctor(doctorId, name, specialization, "Monday-Friday 09AM-05PM"); // Default duty schedule
+        return addDoctor(doctorId, name, specialization, "Monday-Friday 09AM-05PM");
     }
 
-    // New method with custom duty schedule
+    //custom duty schedule
     public boolean addDoctor(String doctorId, String name, String specialization, String dutySchedule) {
         if (doctorDAO.findDoctor(doctorId) != null) {
             return false;
         }
 
-        Doctor doctor = new Doctor(doctorId, name, specialization, dutySchedule );
+        Doctor doctor = new Doctor(doctorId, name, specialization, dutySchedule);
         doctor.setDutySchedule(dutySchedule); // Set the duty schedule
         doctorDAO.addDoctor(doctor);
         return true;
     }
-    
+
     public Doctor[] getDoctorsForDutyDay(int dayIndex) {
         return doctorDAO.getDoctorsForDutyDay(dayIndex);
     }
@@ -46,7 +47,8 @@ public class DoctorManager {
     public void generateSpecialtyReport() {
         doctorDAO.generateSpecialtyReport();
     }
-
+    
+    //set to default edy
     public boolean updateDoctor(String doctorId, String name, String specialization, String dutySchedule) {
         return doctorDAO.updateDoctor(doctorId, name, specialization, dutySchedule);
     }
@@ -89,6 +91,7 @@ public class DoctorManager {
         return doctorDAO.removeDoctorFromDutyDay(dayIndex, doctorId);
     }
 
+    //Not using
     public void displayDutySchedule() {
         doctorDAO.displayDutySchedule();
     }

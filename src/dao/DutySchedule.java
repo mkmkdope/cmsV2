@@ -123,11 +123,12 @@ public class DutySchedule {
         return doctors;
     }
     
+    // Not Using
     public void displayWeeklySchedule() {
         String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
         
         System.out.println("\n" + "=".repeat(60));
-        System.out.println("WEEKLY DUTY SCHEDULE (SEQUENTIAL ASSIGNMENT)");
+        System.out.println("WEEKLY DUTY SCHEDULE");
         System.out.println("=".repeat(60));
         
         for (int day = 0; day < DAYS; day++) {
@@ -137,8 +138,8 @@ public class DutySchedule {
             for (int slot = 0; slot < MAX_SLOTS; slot++) {
                 Doctor doctor = weeklySchedule[day][slot];
                 if (doctor != null) {
-                    String status = doctor.isAvailable() ? "✓ AVAILABLE" : "✗ ON LEAVE";
-                    String indicator = doctor.isAvailable() ? "•" : "✗";
+                    String status = doctor.isAvailable() ? "AVAILABLE" : "ON LEAVE";
+                    String indicator = doctor.isAvailable() ? "o" : "x";
                     
                     System.out.printf("%s %s (%s) - %s%n", 
                         indicator,
@@ -154,7 +155,7 @@ public class DutySchedule {
             }
         }
         System.out.println("\n" + "=".repeat(60));
-        System.out.println("✓ = Available, ✗ = On Leave");
+        System.out.println("o = Available, x = On Leave");
         System.out.println("=".repeat(60));
     }
     
