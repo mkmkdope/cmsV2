@@ -36,38 +36,17 @@ public class ConsultationDAO {
         //temporarily placement for doctor initializer
         //remove after combine
         Doctor d1 = new Doctor(
-                "D2001",
-                "Dr. Lim Wei Chen",
-                "dr.lim@clinic.tarumt.edu.my",
-                "General Medicine",
-                "Monday-Friday 09AM-09PM",
-                true,
-                "15/01/2025",
-                50.00
+                "S013", "Dr. White", "Surgery", "Tuesday-Saturday 10AM-06PM"
         );
 
         // Sample Doctor 2 - Pediatrics
         Doctor d2 = new Doctor(
-                "D2002",
-                "Dr. Nurul Ain Binti Ahmad",
-                "dr.nurul@clinic.tarumt.edu.my",
-                "Pediatrics",
-                "Monday-Saturday 08AM-04PM",
-                true,
-                "20/02/2025",
-                60.00
+                "S014", "Dr. Harris", "Nephrology", "Monday-Saturday 08AM-04PM"
         );
 
         // Sample Doctor 3 - Internal Medicine
         Doctor d3 = new Doctor(
-                "D2003",
-                "Dr. Rajesh Kumar",
-                "dr.rajesh@clinic.tarumt.edu.my",
-                "Internal Medicine",
-                "Tuesday-Saturday 10AM-06PM",
-                false,
-                "10/03/2025",
-                55.00
+                "S015", "Dr. Martin", "Neurology", "Monday-Friday 09AM-09PM"
         );
 
         doctorList.add(d1);
@@ -86,21 +65,21 @@ public class ConsultationDAO {
         c2.setStatus("Completed");
         c2.setFollowUpFlag(false);
         c2.setPreviousConsultationId("C0001");
-        
+
         Consultation c3 = new Consultation(generateID(), patient2, d2,
-        LocalDateTime.of(2025, 7, 9, 9, 30), "Cough");
+                LocalDateTime.of(2025, 7, 9, 9, 30), "Cough");
         c3.setStatus("Cancelled");
         c3.setFollowUpFlag(false);
         c3.setPreviousConsultationId(null);
-        
+
         Consultation c4 = new Consultation(generateID(), patient3, d2,
-        LocalDateTime.of(2025, 7, 10, 10, 0), "Cough");
+                LocalDateTime.of(2025, 7, 10, 10, 0), "Cough");
         c4.setStatus("Completed");
         c4.setFollowUpFlag(false);
         c4.setPreviousConsultationId(null);
-        
+
         Consultation c5 = new Consultation(generateID(), patient4, d3,
-        LocalDateTime.of(2025, 8, 25, 12, 0), "Cough and Fever");
+                LocalDateTime.of(2025, 8, 25, 12, 0), "Cough and Fever");
         c5.setStatus("Scheduled");
         c5.setFollowUpFlag(false);
         c5.setPreviousConsultationId(null);
@@ -110,7 +89,7 @@ public class ConsultationDAO {
         consultationList.add(c3);
         consultationList.add(c4);
         consultationList.add(c5);
-        
+
     }
 
     public static String generateID() {
@@ -130,7 +109,7 @@ public class ConsultationDAO {
     public Doctor findDoctorById(String doctorId) {
         for (int i = 1; i <= doctorList.getNumberOfEntries(); i++) {
             Doctor doctor = doctorList.getEntry(i);
-            if (doctor.getDoctorID().equalsIgnoreCase(doctorId)) {
+            if (doctor.getDoctorId().equalsIgnoreCase(doctorId)) {
                 return doctor;
             }
         }
@@ -141,6 +120,7 @@ public class ConsultationDAO {
     public ListInterface<Consultation> getAllConsultation() {
         return consultationList;
     }
+
     // find consultation by ID for Treatment module integration
     public Consultation findConsultationByID(String consultationId) {
         for (int i = 1; i <= consultationList.getNumberOfEntries(); i++) {

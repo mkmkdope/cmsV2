@@ -472,7 +472,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
             Treatment t = all.getEntry(i);
             if (t.getConsultation() != null &&
                 t.getConsultation().getDoctor() != null &&
-                t.getConsultation().getDoctor().getDoctorID().equalsIgnoreCase(doctorId)) {
+                t.getConsultation().getDoctor().getDoctorId().equalsIgnoreCase(doctorId)) {
                 System.out.println(t);
                 System.out.println("=".repeat(50));
                 found = true;
@@ -1092,7 +1092,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
         for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {
             Treatment t = treatments.getEntry(i);
             if (t.getConsultation().getDoctor() != null && 
-                t.getConsultation().getDoctor().getDoctorID().equalsIgnoreCase(doctorId)) {
+                t.getConsultation().getDoctor().getDoctorId().equalsIgnoreCase(doctorId)) {
                 doctorTreatments.add(t);
             }
         }

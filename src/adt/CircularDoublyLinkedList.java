@@ -405,4 +405,30 @@ public class CircularDoublyLinkedList<T> implements ListInterface<T>{
         }
         return current;
     }
+    
+      public int size() {
+        return size;
+    }
+    
+    public void remove(T item) {
+        if (isEmpty()) return;
+        
+        Node current = head;
+        for (int i = 0; i < size; i++) {
+            if ((item == null && current.data == null) || (item != null && item.equals(current.data))) {
+                if (size == 1) {
+                    head = tail = null;
+                } else {
+                    current.prev.next = current.next;
+                    current.next.prev = current.prev;
+                    if (current == head) head = current.next;
+                    if (current == tail) tail = current.prev;
+                }
+                size--;
+                return;
+            }
+            current = current.next;
+        }
+    }  
+      
 }

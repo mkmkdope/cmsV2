@@ -1,272 +1,303 @@
 package boundary;
 
 import control.DoctorManager;
-import dao.DoctorDAO;
 import entity.Doctor;
 import java.util.Scanner;
 
 public class DoctorMenu {
-    private DoctorManager manager;
-    private Scanner sc = new Scanner(System.in);
 
-    public DoctorMenu(DoctorManager manager) {
-        this.manager = manager;
+    private DoctorManager doctorManager;
+    private Scanner scanner;
+
+    public DoctorMenu() {
+        doctorManager = new DoctorManager();
+        scanner = new Scanner(System.in);
+        initializeSampleData();
     }
 
-    public void start() {
+
+
+    private void initializeSampleData() {
+        doctorManager.addDoctor("S001", "Dr. Smith", "Cardiology");
+        doctorManager.addDoctor("S002", "Dr. Johnson", "Pediatrics");
+        doctorManager.addDoctor("S003", "Dr. Williams", "Surgery");
+        doctorManager.addDoctor("S004", "Dr. Brown", "Neurology");
+        doctorManager.addDoctor("S005", "Dr. Davis", "Orthopedics");
+        doctorManager.addDoctor("S006", "Dr. Miller", "Dermatology");
+        doctorManager.addDoctor("S007", "Dr. Wilson", "Ophthalmology");
+        doctorManager.addDoctor("S008", "Dr. Moore", "Surgery");
+        doctorManager.addDoctor("S009", "Dr. Taylor", "Radiology");
+        doctorManager.addDoctor("S010", "Dr. Anderson", "Neurology");
+        doctorManager.addDoctor("S011", "Dr. Thomas", "Neurology");
+        doctorManager.addDoctor("S012", "Dr. Jackson", "Surgery");
+        doctorManager.addDoctor("S013", "Dr. White", "Surgery", "Tuesday-Saturday 10AM-06PM");
+        doctorManager.addDoctor("S014", "Dr. Harris", "Nephrology", "Monday-Saturday 08AM-04PM");
+        doctorManager.addDoctor("S015", "Dr. Martin", "Neurology", "Monday-Friday 09AM-09PM");
+    }
+
+    public void displayMenu() {
         int choice;
         do {
-            System.out.println(Messages.DOCTOR_MENU_HEADER);
-            System.out.println(Messages.DOCTOR_MENU_OPTION);
-            System.out.print(Messages.DOCTOR_MENU_PROMPT);
+            System.out.println("\n=== Doctor Management System ===");
+            System.out.println("1. Add Doctor");
+            System.out.println("2. List all Doctor");
+            System.out.println("3. Search Doctor by ID");
+            System.out.println("4. Edit Doctor");
+            System.out.println("5. Update Availability");
+            System.out.println("6. Duty Report");
+            System.out.println("7. Add Doctor to Duty Day");
+            System.out.println("8. Remove Doctor from Duty Day");
+            System.out.println("9. Reset Schedule"); //Regenerate
+            System.out.println("10. Workload Report");
+            System.out.println("11. Specialty Report");
+            //System.out.println(". Remove Doctor"); //should not delete doctor profile just set as active or inactive
+            //System.out.println(". Display Duty Schedule"); // use duty report instead                   
+            System.out.println("0. Back to Main Menu");
+            System.out.print("Enter choice: ");
 
-            while (!sc.hasNextInt()) {
-                System.out.println(Messages.INVALID_NUM);
-                sc.nextLine();
-            }
-            choice = sc.nextInt();
-            sc.nextLine();  // clear buffer
+            choice = scanner.nextInt();
+            scanner.nextLine();
 
             switch (choice) {
-                case 1:
-                    registerDoctor();
-                    break;
-                case 2:
-                    manager.displayAllDoctors();
-                    break;
-                case 3:
+                case 1 ->
+                    addDoctor();
+                case 2 ->
+                    listAllDoctors();
+                case 3 ->
                     searchDoctor();
-                    break;
-                case 4:
-                    updateDoctor();
-                    break;
-                case 5:
-                    deleteDoctor();
-                    break;
-                case 6:
-                    manager.displayAvailableDoctors();
-                    break;
-                case 7:
-                    searchBySpecialization();
-                    break;
-                case 8:
-                    sortDoctorsMenu();
-                    break;
-                case 9:
-                    System.out.println("Returning to Main Menu...");
-                    break;
-                default:
-                    System.out.printf(Messages.INVALID_CHOICE, 1, 9);
+                case 4 ->
+                    editDoctor();
+                case 5 ->
+                    updateAvailability();
+                case 6 ->
+                    dutyReport();                
+                case 7 ->
+                    addDoctorToDutyDay();
+                case 8 ->
+                    removeDoctorFromDutyDay();
+                 case 9 ->
+                    regenerateSchedule();                   
+                case 10 ->
+                    workloadReport();
+                case 11 ->
+                    specialtyReport();
+                //case  -> removeDoctor();
+                //case  -> displayDutySchedule();
+                case 0 ->
+                    System.out.println("Loading...");
+                default ->
+                    System.out.println("Invalid choice!");
             }
-        } while (choice != 9);
+        } while (choice != 0);
+    }
+    private void dutyReport() {
+        doctorManager.generateDutyReport();
+    }
+    
+    private void workloadReport() {
+        doctorManager.generateWorkloadReport();
     }
 
-    private void registerDoctor() {
-        System.out.print("Enter Doctor Name: ");
-        String name = sc.nextLine().trim();
-        if (name.isEmpty()) {
-            System.out.println("Name cannot be empty.");
-            return;
-        }
+    private void specialtyReport() {
+        doctorManager.generateSpecialtyReport();
+    }
 
-        System.out.print("Enter Email: ");
-        String email = sc.nextLine().trim();
-        if (!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w+$")) {
-            System.out.println("Invalid email format.");
-            return;
-        }
-
+    private void addDoctor() {
+        System.out.print("Enter Doctor ID: ");
+        String id = scanner.nextLine();
+        System.out.print("Enter Name: ");
+        String name = scanner.nextLine();
         System.out.print("Enter Specialization: ");
-        String specialization = sc.nextLine().trim();
-        if (specialization.isEmpty()) {
-            System.out.println("Specialization cannot be empty.");
-            return;
-        }
+        String specialization = scanner.nextLine();
+        System.out.print("Enter Duty Schedule (e.g., Monday-Friday 09AM-05PM): ");
+        String dutySchedule = scanner.nextLine();
 
-        System.out.print("Enter Duty Schedule (e.g., Monday-Friday 9AM-5PM): ");
-        String dutySchedule = sc.nextLine().trim();
-        if (dutySchedule.isEmpty()) {
-            System.out.println("Duty schedule cannot be empty.");
-            return;
-        }
+        boolean success = doctorManager.addDoctor(id, name, specialization, dutySchedule);
 
-        System.out.print("Is Available? (true/false): ");
-        String availableStr = sc.nextLine().trim();
-        boolean isAvailable;
-        if (availableStr.equalsIgnoreCase("true")) {
-            isAvailable = true;
-        } else if (availableStr.equalsIgnoreCase("false")) {
-            isAvailable = false;
+        if (success) {
+            System.out.println("Doctor added successfully!");
         } else {
-            System.out.println("Please enter true or false.");
-            return;
+            System.out.println("Failed to add doctor. Doctor ID may already exist.");
         }
+    }
 
-        System.out.print("Enter Join Date (dd/MM/yyyy): ");
-        String joinDate = sc.nextLine().trim();
-        if (joinDate.isEmpty()) {
-            System.out.println("Join date cannot be empty.");
-            return;
-        }
-
-        System.out.print("Enter Consultation Fee (RM): ");
-        double consultationFee;
-        try {
-            consultationFee = Double.parseDouble(sc.nextLine().trim());
-            if (consultationFee < 0) {
-                System.out.println("Consultation fee cannot be negative.");
-                return;
+    private void listAllDoctors() {
+        System.out.println("\n=== All Doctors ===");
+        Doctor[] doctors = doctorManager.getAllDoctors();
+        if (doctors.length == 0) {
+            System.out.println("No doctors found.");
+        } else {
+            for (Doctor doctor : doctors) {
+                System.out.println(doctor);
             }
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid consultation fee.");
-            return;
         }
-
-        manager.registerDoctor(name, email, specialization, dutySchedule, isAvailable, joinDate, consultationFee);
     }
 
     private void searchDoctor() {
-        System.out.print("Enter Doctor ID or Email: ");
-        String keyword = sc.nextLine().trim();
-        manager.searchDoctor(keyword);
+        System.out.print("Enter Doctor ID to search: ");
+        String id = scanner.nextLine();
+        Doctor doctor = doctorManager.searchDoctor(id);
+
+        if (doctor != null) {
+            System.out.println("Doctor found: " + doctor);
+        } else {
+            System.out.println("Doctor not found!");
+        }
     }
 
-    private void updateDoctor() {
-        System.out.print("Enter Doctor ID to update: ");
-        String id = sc.nextLine().trim();
+    private void editDoctor() {
+        System.out.print("Enter Doctor ID to edit: ");
+        String id = scanner.nextLine();
 
-        Doctor existing = manager.getDoctorById(id);
-        if (existing == null) {
-            System.out.println("Doctor not found.");
-            return;
-        }
+        Doctor doctor = doctorManager.searchDoctor(id);
+        if (doctor != null) {
+            System.out.println("Current details: " + doctor);
 
-        System.out.println("Current doctor information:");
-        System.out.println(existing);
+            System.out.print("Enter new name (current: " + doctor.getName() + "): ");
+            String name = scanner.nextLine();
+            if (name.trim().isEmpty()) {
+                name = doctor.getName(); // Keep current if empty
+            }
 
-        System.out.print("Enter new name [" + existing.getName() + "]: ");
-        String name = sc.nextLine().trim();
-        if (name.isEmpty()) name = existing.getName();
+            System.out.print("Enter new specialization (current: " + doctor.getSpecialization() + "): ");
+            String specialization = scanner.nextLine();
+            if (specialization.trim().isEmpty()) {
+                specialization = doctor.getSpecialization(); // Keep current if empty
+            }
+            System.out.print("Enter new Schedule (current: " + doctor.getDutySchedule() + "): ");
+            String dutySchedule = scanner.nextLine();
+            if (dutySchedule.trim().isEmpty()) {
+                dutySchedule = doctor.getDutySchedule(); // Keep current if empty
+            }
 
-        System.out.print("Enter new email [" + existing.getEmail() + "]: ");
-        String email = sc.nextLine().trim();
-        if (email.isEmpty()) email = existing.getEmail();
-
-        System.out.print("Enter new specialization [" + existing.getSpecialization() + "]: ");
-        String specialization = sc.nextLine().trim();
-        if (specialization.isEmpty()) specialization = existing.getSpecialization();
-
-        System.out.print("Enter new duty schedule [" + existing.getDutySchedule() + "]: ");
-        String dutySchedule = sc.nextLine().trim();
-        if (dutySchedule.isEmpty()) dutySchedule = existing.getDutySchedule();
-
-        System.out.print("Is Available? [" + existing.isAvailable() + "] (true/false): ");
-        String availableStr = sc.nextLine().trim();
-        boolean isAvailable = existing.isAvailable();
-        if (!availableStr.isEmpty()) {
-            if (availableStr.equalsIgnoreCase("true")) {
-                isAvailable = true;
-            } else if (availableStr.equalsIgnoreCase("false")) {
-                isAvailable = false;
+            if (doctorManager.updateDoctor(id, name, specialization, dutySchedule)) {
+                System.out.println("Doctor updated successfully!");
+                System.out.println("Updated details: " + doctorManager.searchDoctor(id));
             } else {
-                System.out.println("Invalid input. Keeping current value.");
+                System.out.println("Failed to update doctor.");
             }
+        } else {
+            System.out.println("Doctor not found!");
         }
+    }
 
-        System.out.print("Enter new join date [" + existing.getJoinDate() + "]: ");
-        String joinDate = sc.nextLine().trim();
-        if (joinDate.isEmpty()) joinDate = existing.getJoinDate();
+    //should not delete doctor profile just set as active or inactive 
+    private void removeDoctor() {
+        System.out.print("Enter Doctor ID to remove: ");
+        String id = scanner.nextLine();
 
-        System.out.print("Enter new consultation fee [" + existing.getConsultationFee() + "]: ");
-        String feeStr = sc.nextLine().trim();
-        double consultationFee = existing.getConsultationFee();
-        if (!feeStr.isEmpty()) {
-            try {
-                consultationFee = Double.parseDouble(feeStr);
-                if (consultationFee < 0) {
-                    System.out.println("Consultation fee cannot be negative. Keeping current value.");
-                    consultationFee = existing.getConsultationFee();
+        if (doctorManager.removeDoctor(id)) {
+            System.out.println("Doctor removed successfully!");
+        } else {
+            System.out.println("Doctor not found!");
+        }
+    }
+    
+    //duty report visualise better
+    private void displayDutySchedule() {
+        System.out.println("\n=== Weekly Duty Schedule ===");
+        doctorManager.displayDutySchedule();
+    }
+
+    private void updateAvailability() {
+        System.out.print("Enter Doctor ID: ");
+        String id = scanner.nextLine();
+        System.out.print("Set available? (true/false): ");
+        boolean available = scanner.nextBoolean();
+        scanner.nextLine();
+
+        if (doctorManager.updateAvailability(id, available)) {
+            System.out.println("Availability updated successfully!");
+        } else {
+            System.out.println("Doctor not found!");
+        }
+    }
+
+    private void addDoctorToDutyDay() {
+        try {
+            System.out.println("\n=== Add Doctor to Duty Day ===");
+            System.out.println("Days: 0=Monday, 1=Tuesday, 2=Wednesday, 3=Thursday, 4=Friday");
+            System.out.print("Enter day index (0-4): ");
+            int dayIndex = scanner.nextInt();
+            scanner.nextLine();
+
+            // Show current doctors on this day
+            System.out.println("\nCurrent doctors on " + getDayName(dayIndex) + ":");
+            Doctor[] currentDoctors = doctorManager.getDoctorsForDutyDay(dayIndex);
+            if (currentDoctors.length == 0) {
+                System.out.println("  No doctors scheduled");
+            } else {
+                for (Doctor doctor : currentDoctors) {
+                    System.out.println("  • " + doctor.getName() + " (" + doctor.getDoctorId() + ")");
                 }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid consultation fee. Keeping current value.");
-                consultationFee = existing.getConsultationFee();
             }
-        }
 
-        System.out.print("Are you sure you want to update this doctor? (Y/N): ");
-        String confirm = sc.nextLine().trim();
-        if (confirm.equalsIgnoreCase("Y")) {
-            manager.updateDoctor(id, name, email, specialization, dutySchedule, isAvailable, joinDate, consultationFee);
-        } else {
-            System.out.println("Update cancelled.");
-        }
-    }
+            System.out.print("\nEnter Doctor ID to add: ");
+            String doctorId = scanner.nextLine();
 
-    private void deleteDoctor() {
-        System.out.print("Enter Doctor ID to delete: ");
-        String id = sc.nextLine().trim();
-
-        Doctor existing = manager.getDoctorById(id);
-        if (existing == null) {
-            System.out.println("Doctor not found.");
-            return;
-        }
-
-        System.out.println("Doctor to be deleted:");
-        System.out.println(existing);
-
-        System.out.print("Are you sure you want to delete this doctor? (Y/N): ");
-        String confirm = sc.nextLine().trim();
-        if (confirm.equalsIgnoreCase("Y")) {
-            manager.deleteDoctor(id);
-        } else {
-            System.out.println("Delete cancelled.");
+            if (doctorManager.addDoctorToDutyDay(dayIndex, doctorId)) {
+                System.out.println("✓ Doctor successfully added to duty!");
+            } else {
+                System.out.println("✗ Failed to add doctor to duty.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error: Invalid input. Please enter numbers for day index.");
+            scanner.nextLine(); // Clear invalid input
         }
     }
 
-    private void searchBySpecialization() {
-        System.out.print("Enter specialization to search: ");
-        String specialization = sc.nextLine().trim();
-        if (specialization.isEmpty()) {
-            System.out.println("Specialization cannot be empty.");
-            return;
-        }
-        manager.displayDoctorsBySpecialization(specialization);
-    }
+    private void removeDoctorFromDutyDay() {
+        try {
+            System.out.println("\n=== Remove Doctor from Duty Day ===");
+            System.out.println("Days: 0=Monday, 1=Tuesday, 2=Wednesday, 3=Thursday, 4=Friday");
+            System.out.print("Enter day index (0-4): ");
+            int dayIndex = scanner.nextInt();
+            scanner.nextLine();
 
-    private void sortDoctorsMenu() {
-        System.out.println("\n" + Messages.FORMAT);
-        System.out.println(" SORT DOCTORS");
-        System.out.println(Messages.FORMAT);
-        System.out.println("1. Sort by Name");
-        System.out.println("2. Sort by Specialization");
-        System.out.println("3. Sort by Consultation Fee");
-        System.out.println("4. Back to Doctor Menu");
-        System.out.print("Enter choice: ");
+            // Show current doctors on this day
+            System.out.println("\nCurrent doctors on " + getDayName(dayIndex) + ":");
+            Doctor[] currentDoctors = doctorManager.getDoctorsForDutyDay(dayIndex);
+            if (currentDoctors.length == 0) {
+                System.out.println("  No doctors scheduled");
+                return;
+            }
 
-        while (!sc.hasNextInt()) {
-            System.out.println(Messages.INVALID_INPUT);
-            sc.nextLine();
-        }
+            for (Doctor doctor : currentDoctors) {
+                System.out.println("  • " + doctor.getName() + " (" + doctor.getDoctorId() + ")");
+            }
 
-        int choice = sc.nextInt();
-        sc.nextLine();
+            System.out.print("\nEnter Doctor ID to remove: ");
+            String doctorId = scanner.nextLine();
 
-        switch (choice) {
-            case 1:
-                manager.sortDoctorsByName();
-                break;
-            case 2:
-                manager.sortDoctorsBySpecialization();
-                break;
-            case 3:
-                manager.sortDoctorsByConsultationFee();
-                break;
-            case 4:
-                System.out.println("Returning to Doctor Menu...");
-                break;
-            default:
-                System.out.println("Invalid choice.");
+            if (doctorManager.removeDoctorFromDutyDay(dayIndex, doctorId)) {
+                System.out.println("✓ Doctor successfully removed from duty!");
+            } else {
+                System.out.println("✗ Failed to remove doctor from duty.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error: Invalid input. Please enter numbers for day index.");
+            scanner.nextLine(); // Clear invalid input
         }
     }
+
+    private String getDayName(int dayIndex) {
+        String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+        if (dayIndex >= 0 && dayIndex < days.length) {
+            return days[dayIndex];
+        }
+        return "Invalid Day";
+    }
+
+    private void regenerateSchedule() {
+        System.out.println("\n=== Regenerating Schedule ===");
+        doctorManager.regenerateSchedule();
+        System.out.println("Doctor Duty Schedule is Ready!");
+        doctorManager.displayDutySchedule();
+    }
+
+    //for testing
+//    public static void main(String[] args) {
+//        DoctorMenu menu = new DoctorMenu();
+//        menu.displayMenu();
+//    }
 }

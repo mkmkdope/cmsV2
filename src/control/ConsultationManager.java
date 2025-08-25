@@ -125,7 +125,7 @@ public class ConsultationManager {
         for (Doctor doc : doctorList) {
             if (doc.isAvailable()) {//today work or not
                 availableDoctors.add(doc);
-                System.out.printf("%s - %s (%s)\n", doc.getDoctorID(), doc.getName(), doc.getSpecialization());
+                System.out.printf("%s - %s (%s)\n", doc.getDoctorId(), doc.getName(), doc.getSpecialization());
             }
         }
         System.out.println("\n" + "=".repeat(50));
@@ -174,7 +174,7 @@ public class ConsultationManager {
         ListInterface<LocalTime> bookedTimes = new CircularDoublyLinkedList<>();
         for (Consultation c : consultationList) {
             if (c.getDoctor() != null
-                    && c.getDoctor().getDoctorID().equals(selectedDoctor.getDoctorID())
+                    && c.getDoctor().getDoctorId().equals(selectedDoctor.getDoctorId())
                     && c.getDateTime().toLocalDate().equals(date)
                     && (!c.getStatus().equalsIgnoreCase("Cancelled") || !c.getStatus().equalsIgnoreCase("Completed"))) {
                 bookedTimes.add(c.getDateTime().toLocalTime());
@@ -259,7 +259,7 @@ public class ConsultationManager {
                 //check exist of this doctor in db
                 for (int i = 1; i <= availableDoctors.getNumberOfEntries(); i++) {
                     Doctor doc = availableDoctors.getEntry(i);
-                    if (doc.getDoctorID().equalsIgnoreCase(doctorID)) {
+                    if (doc.getDoctorId().equalsIgnoreCase(doctorID)) {
                         selectedDoctor = doc;
                         break;
                     }

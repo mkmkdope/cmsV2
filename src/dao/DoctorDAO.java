@@ -1,175 +1,607 @@
 package dao;
 
 import adt.CircularDoublyLinkedList;
-import adt.ListInterface;
 import entity.Doctor;
 import java.util.Comparator;
 
-/**
- * Data Access Object for Doctor operations
- * Uses CircularDoublyLinkedList from ADT package
- */
 public class DoctorDAO {
-    
-    private ListInterface<Doctor> doctorList = new CircularDoublyLinkedList<>();
-    private int idCounter = 1;
+
+    private CircularDoublyLinkedList<Doctor> doctorList;
+    private DutySchedule dutySchedule;
+    private static final int DAYS = 5;
+    private static final int MAX_SLOTS = 10;
 
     public DoctorDAO() {
-        // Initialize with sample doctors
-        addDoctor(new Doctor("D2001", "Dr. Lim Wei Chen", "dr.lim@clinic.tarumt.edu.my", 
-                           "General Medicine", "Monday-Friday 09AM-09PM", true, "15/01/2025", 50.00));
-        
-        addDoctor(new Doctor("D2002", "Dr. Nurul Ain Binti Ahmad", "dr.nurul@clinic.tarumt.edu.my", 
-                           "Pediatrics", "Monday-Saturday 08AM-04PM", true, "20/02/2025", 60.00));
-        
-        addDoctor(new Doctor("D2003", "Dr. Rajesh Kumar", "dr.rajesh@clinic.tarumt.edu.my", 
-                           "Internal Medicine", "Tuesday-Saturday 10AM-06PM", false, "10/03/2025", 55.00));
-        
-        addDoctor(new Doctor("D2004", "Dr. Sarah Tan", "dr.sarah@clinic.tarumt.edu.my", 
-                           "Cardiology", "Monday-Friday 08AM-05PM", true, "05/04/2025", 80.00));
-        
-        addDoctor(new Doctor("D2005", "Dr. Ahmad Zulkifli", "dr.ahmad@clinic.tarumt.edu.my", 
-                           "Orthopedics", "Wednesday-Sunday 09AM-06PM", true, "12/05/2025", 70.00));
+        doctorList = new CircularDoublyLinkedList<>();
+        dutySchedule = new DutySchedule(doctorList);
+        dutySchedule.generateBaseSchedule();
     }
 
-    public String generateDoctorId() {
-        return String.format("D%04d", idCounter++);
+    public void addDoctor(Doctor doctor) {
+        doctorList.add(doctor);
+        dutySchedule.rearrangeSchedule();
     }
 
-    public boolean addDoctor(Doctor doctor) {
-        if (findDoctorById(doctor.getDoctorID()) != null) {
-            return false; // Duplicate ID
-        }
-        
-        if (findDoctorByEmail(doctor.getEmail()) != null) {
-            return false; // Duplicate email
-        }
-        
-        return doctorList.add(doctor);
-    }
-
-    public Doctor findDoctorById(String doctorId) {
-        Comparator<Doctor> idComparator = (d1, d2) -> d1.getDoctorID().compareToIgnoreCase(d2.getDoctorID());
-        Doctor searchKey = new Doctor(doctorId, "", "", "", "", false, "", 0.0);
-        
-        int index = doctorList.searchByKey(idComparator, searchKey);
-        if (index != -1) {
-            return doctorList.getEntry(index);
-        }
-        
-        // Fallback to traversal
-        for (Doctor doctor : doctorList) {
-            if (doctor.getDoctorID().equalsIgnoreCase(doctorId)) {
+    public Doctor findDoctor(String doctorId) {
+        for (int i = 1; i <= doctorList.size(); i++) {
+            Doctor doctor = doctorList.getEntry(i);
+            if (doctor.getDoctorId().equals(doctorId)) {
                 return doctor;
             }
         }
         return null;
     }
 
-    public Doctor findDoctorByEmail(String email) {
-        for (Doctor doctor : doctorList) {
-            if (doctor.getEmail().equalsIgnoreCase(email)) {
-                return doctor;
-            }
+    public void updateDoctorAvailability(String doctorId, boolean isAvailable) {
+        Doctor doctor = findDoctor(doctorId);
+        if (doctor != null) {
+            doctor.setAvailable(isAvailable);
+            dutySchedule.rearrangeSchedule();
         }
-        return null;
     }
 
-    public boolean updateDoctor(Doctor updatedDoctor) {
-        for (int i = 1; i <= doctorList.getNumberOfEntries(); i++) {
-            if (doctorList.getEntry(i).getDoctorID().equalsIgnoreCase(updatedDoctor.getDoctorID())) {
-                return doctorList.replace(i, updatedDoctor);
-            }
+    public boolean updateDoctor(String doctorId, String newName, String newSpecialization, String dutySchedule) {
+        Doctor doctor = findDoctor(doctorId);
+        if (doctor != null) {
+            doctor.setName(newName);
+            doctor.setSpecialization(newSpecialization);
+            return true;
         }
         return false;
     }
 
-    public boolean deleteDoctor(String doctorId) {
-        for (int i = 1; i <= doctorList.getNumberOfEntries(); i++) {
-            if (doctorList.getEntry(i).getDoctorID().equalsIgnoreCase(doctorId)) {
-                doctorList.remove(i);
+    public void removeDoctor(String doctorId) {
+        Doctor doctor = findDoctor(doctorId);
+        if (doctor != null) {
+            doctorList.remove(doctor);
+            dutySchedule.rearrangeSchedule();
+        }
+    }
+
+    public Doctor[] getAllDoctors() {
+        Doctor[] doctors = new Doctor[doctorList.size()];
+        for (int i = 0; i < doctorList.size(); i++) {
+            doctors[i] = doctorList.getEntry(i + 1);
+        }
+        return doctors;
+    }
+
+    public Doctor[] getDoctorsSortedById() {
+        Doctor[] doctors = getAllDoctors();
+        insertionSortById(doctors);
+        return doctors;
+    }
+
+    private void insertionSortById(Doctor[] doctors) {
+        for (int i = 1; i < doctors.length; i++) {
+            Doctor key = doctors[i];
+            int j = i - 1;
+
+            while (j >= 0 && doctors[j].getDoctorId().compareTo(key.getDoctorId()) > 0) {
+                doctors[j + 1] = doctors[j];
+                j = j - 1;
+            }
+            doctors[j + 1] = key;
+        }
+    }
+
+    public Doctor[] getAvailableDoctors() {
+        Doctor[] allDoctors = getAllDoctors();
+        int availableCount = 0;
+
+        for (Doctor doctor : allDoctors) {
+            if (doctor.isAvailable()) {
+                availableCount++;
+            }
+        }
+
+        Doctor[] availableDoctors = new Doctor[availableCount];
+        int index = 0;
+
+        for (Doctor doctor : allDoctors) {
+            if (doctor.isAvailable()) {
+                availableDoctors[index++] = doctor;
+            }
+        }
+
+        return availableDoctors;
+    }
+
+    public int getDoctorCount() {
+        return doctorList.size();
+    }
+
+    public boolean addDoctorToDutyDay(int dayIndex, String doctorId) {
+        if (dayIndex < 0 || dayIndex >= 5) {
+            System.out.println("Error: Day index must be between 0-4 (Mon-Fri)");
+            return false;
+        }
+
+        Doctor doctor = findDoctor(doctorId);
+        if (doctor == null) {
+            System.out.println("Error: Doctor with ID " + doctorId + " not found.");
+            return false;
+        }
+
+        if (!doctor.isAvailable()) {
+            System.out.println("Error: Doctor " + doctor.getName() + " is not available for duty.");
+            return false;
+        }
+
+        boolean success = dutySchedule.addDoctorToDay(dayIndex, doctor);
+        if (success) {
+            System.out.println("Successfully added doctor to duty day.");
+        }
+        return success;
+    }
+
+    public boolean removeDoctorFromDutyDay(int dayIndex, String doctorId) {
+        if (dayIndex < 0 || dayIndex >= 5) {
+            System.out.println("Error: Day index must be between 0-4 (Mon-Fri)");
+            return false;
+        }
+
+        Doctor doctor = findDoctor(doctorId);
+        if (doctor == null) {
+            System.out.println("Error: Doctor with ID " + doctorId + " not found.");
+            return false;
+        }
+
+        boolean success = dutySchedule.removeDoctorFromDay(dayIndex, doctorId);
+        if (success) {
+            System.out.println("Successfully removed doctor from duty day.");
+        }
+        return success;
+    }
+
+    public void displayDutySchedule() {
+        dutySchedule.displayWeeklySchedule();
+    }
+
+    public void rearrangeDutySchedule() {
+        dutySchedule.rearrangeSchedule();
+    }
+
+    public Doctor[] getDoctorsForDutyDay(int dayIndex) {
+        return dutySchedule.getDoctorsForDay(dayIndex);
+    }
+
+    public int getTotalScheduledDoctors() {
+        return dutySchedule.getTotalScheduledDoctors();
+    }
+
+    public void regenerateSchedule() {
+        dutySchedule.generateBaseSchedule();
+    }
+
+    public void generateDutyReport() {
+        System.out.println("\n=== Duty Report (Sorted by ID) ===");
+        System.out.println("ID   Name                 Mon Tue Wed Thu Fri");
+        System.out.println("---------------------------------------------");
+
+        Doctor[] doctors = getDoctorsSortedById();
+        int totalScheduledDuties = 0;
+
+        for (Doctor doctor : doctors) {
+            System.out.printf("%-5s %-20s", doctor.getDoctorId(), doctor.getName());
+
+            for (int day = 0; day < 5; day++) {
+                boolean isOnDuty = isDoctorOnDuty(doctor, day);
+                boolean isOnLeave = !doctor.isAvailable();
+
+                if (isOnDuty && !isOnLeave) {
+                    System.out.print(" *  ");
+                    totalScheduledDuties++;
+                } else if (isOnLeave) {
+                    System.out.print(" x  ");
+                } else {
+                    System.out.print("    ");
+                }
+            }
+            System.out.println();
+        }
+
+        System.out.println("---------------------------------------------");
+        System.out.println("Total Doctors: " + doctors.length);
+        System.out.println("Total Scheduled Duties: " + totalScheduledDuties);
+        System.out.println("Maximum Duties Per Week: " + (5 * MAX_SLOTS));
+        System.out.println("=== End Of Report ===");
+    }
+
+    private boolean isDoctorOnDuty(Doctor doctor, int dayIndex) {
+        for (int slot = 0; slot < MAX_SLOTS; slot++) {
+            if (dutySchedule.getWeeklySchedule()[dayIndex][slot] != null
+                    && dutySchedule.getWeeklySchedule()[dayIndex][slot].equals(doctor)) {
                 return true;
             }
         }
         return false;
     }
 
-    public ListInterface<Doctor> getAllDoctors() {
-        return doctorList;
-    }
+    ////////////////////////////// Workload Report [Sorted by Duties] //////////////////////////////
+public void generateWorkloadReport() {
+        System.out.println("\n=== TARUMT CLINIC MANAGEMENT SYSTEM ===");
+        System.out.println("=== Workload Analysis Report ===");
 
-    public ListInterface<Doctor> getAvailableDoctors() {
-        ListInterface<Doctor> availableDoctors = new CircularDoublyLinkedList<>();
-        for (Doctor doctor : doctorList) {
-            if (doctor.isAvailable()) {
-                availableDoctors.add(doctor);
+        System.out.println("ID    Doctor                Duties  Status      Workload %  Chart (| = 2%)");
+        System.out.println("-----------------------------------------------------------------------");
+
+        Doctor[] doctors = getAllDoctors();
+        DoctorWorkload[] workloads = new DoctorWorkload[doctors.length];
+
+        // Calculate workloads and total duties
+        int totalDuties = 0;
+        for (int i = 0; i < doctors.length; i++) {
+            int dutyCount = countDuties(doctors[i]);
+            workloads[i] = new DoctorWorkload(doctors[i], dutyCount);
+            totalDuties += dutyCount;
+        }
+
+        // Sort by duty count (descending)
+        bubbleSortWorkloads(workloads);
+
+        int maxDuties = 0;
+        String busiestDoctor = "";
+
+        // Find max duties for identification
+        for (DoctorWorkload wl : workloads) {
+            if (wl.dutyCount > maxDuties) {
+                maxDuties = wl.dutyCount;
+                busiestDoctor = wl.doctor.getName();
             }
         }
-        return availableDoctors;
+
+        // Display each doctor with barchart
+        for (DoctorWorkload wl : workloads) {
+            String status = wl.doctor.isAvailable() ? "Available" : "On Leave";
+            double workloadPercentage = totalDuties > 0
+                    ? (double) wl.dutyCount / totalDuties * 100 : 0;
+            String barChart = generateBarChart(workloadPercentage, 20); // 20 character width
+
+            System.out.printf("%-5s %-20s %4d    %-10s %6.1f%%   %s%n",
+                    wl.doctor.getDoctorId(),
+                    wl.doctor.getName(),
+                    wl.dutyCount,
+                    status,
+                    workloadPercentage,
+                    barChart);
+        }
+
+        double averageDuties = doctors.length > 0 ? (double) totalDuties / doctors.length : 0;
+
+        System.out.println("-----------------------------------------------------------------------");
+
+        System.out.printf("Total Duties: %d%n", totalDuties);
+        System.out.printf("Average Duties: %.1f%n", averageDuties);
+        System.out.printf("Busiest Doctor: %s (%d duties)%n", busiestDoctor, maxDuties);
+        //System.out.printf("Maximum Possible: %d%n", DAYS * MAX_SLOTS);
+
+        displayWorkloadDistribution(workloads);
+
+        System.out.println("\nChart Legend: Each | represents approximately 2% of total workload");
+        System.out.println("Workload % = (Individual Duties / Total Duties) * 100%");
+        System.out.println("=== End of Workload Report ===");
     }
 
-    public ListInterface<Doctor> getDoctorsBySpecialization(String specialization) {
-        ListInterface<Doctor> specializedDoctors = new CircularDoublyLinkedList<>();
-        for (Doctor doctor : doctorList) {
-            if (doctor.getSpecialization().equalsIgnoreCase(specialization)) {
-                specializedDoctors.add(doctor);
+    private String generateBarChart(double workloadPercentage, int maxWidth) {
+        if (workloadPercentage == 0) {
+            return " ".repeat(maxWidth);
+        }
+
+        // Each | character represents 2% of total workload
+        int barLength = (int) Math.round(workloadPercentage / 2);
+
+        // Ensure bar doesn't exceed max width
+        if (barLength > maxWidth) {
+            barLength = maxWidth;
+        }
+
+        StringBuilder bar = new StringBuilder();
+
+        // Add | characters
+        for (int i = 0; i < barLength; i++) {
+            bar.append("|");
+        }
+
+        // Add empty space for the rest
+        for (int i = barLength; i < maxWidth; i++) {
+            bar.append(" ");
+        }
+
+        return bar.toString();
+    }
+
+    private void bubbleSortWorkloads(DoctorWorkload[] workloads) {
+        boolean swapped;
+        int n = workloads.length;
+
+        for (int i = 0; i < n - 1; i++) {
+            swapped = false;
+            for (int j = 0; j < n - i - 1; j++) {
+                // Sort by duty count descending (highest first)
+                if (workloads[j].dutyCount < workloads[j + 1].dutyCount) {
+                    // Swap
+                    DoctorWorkload temp = workloads[j];
+                    workloads[j] = workloads[j + 1];
+                    workloads[j + 1] = temp;
+                    swapped = true;
+                } // If duty counts are equal, sort by doctor ID ascending
+                else if (workloads[j].dutyCount == workloads[j + 1].dutyCount) {
+                    if (workloads[j].doctor.getDoctorId().compareTo(workloads[j + 1].doctor.getDoctorId()) > 0) {
+                        // Swap
+                        DoctorWorkload temp = workloads[j];
+                        workloads[j] = workloads[j + 1];
+                        workloads[j + 1] = temp;
+                        swapped = true;
+                    }
+                }
+            }
+            // If no swapping occurred, array is sorted
+            if (!swapped) {
+                break;
             }
         }
-        return specializedDoctors;
     }
 
-    public void sortDoctorsByName() {
-        doctorList.mergeSort((d1, d2) -> d1.getName().compareToIgnoreCase(d2.getName()));
+    private void displayWorkloadDistribution(DoctorWorkload[] workloads) {
+        int[] distribution = new int[6]; // 0, 1-2, 3-4, 5-6, 7-8, 9+ duties
+
+        for (DoctorWorkload wl : workloads) {
+            if (wl.dutyCount == 0) {
+                distribution[0]++;
+            } else if (wl.dutyCount <= 2) {
+                distribution[1]++;
+            } else if (wl.dutyCount <= 4) {
+                distribution[2]++;
+            } else if (wl.dutyCount <= 6) {
+                distribution[3]++;
+            } else if (wl.dutyCount <= 8) {
+                distribution[4]++;
+            } else {
+                distribution[5]++;
+            }
+        }
+
+        System.out.println("\nWorkload Distribution:");
+        System.out.println("0 duties:    " + distribution[0] + " doctors");
+        System.out.println("1-2 duties:  " + distribution[1] + " doctors");
+        System.out.println("3-4 duties:  " + distribution[2] + " doctors");
+        System.out.println("5-6 duties:  " + distribution[3] + " doctors");
+        System.out.println("7-8 duties:  " + distribution[4] + " doctors");
+        System.out.println("9+ duties:   " + distribution[5] + " doctors");
     }
 
-    public void sortDoctorsBySpecialization() {
-        doctorList.mergeSort((d1, d2) -> d1.getSpecialization().compareToIgnoreCase(d2.getSpecialization()));
+    ////////////////////////////// End of workload report //////////////////////////////
+
+private int countDuties(Doctor doctor) {
+        int count = 0;
+        for (int day = 0; day < DAYS; day++) {
+            for (int slot = 0; slot < MAX_SLOTS; slot++) {
+                if (dutySchedule.getWeeklySchedule()[day][slot] != null
+                        && dutySchedule.getWeeklySchedule()[day][slot].equals(doctor)) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
-    public void sortDoctorsByConsultationFee() {
-        doctorList.mergeSort((d1, d2) -> Double.compare(d1.getConsultationFee(), d2.getConsultationFee()));
+    private void mergeSort(DoctorWorkload[] array, Comparator<DoctorWorkload> comparator) {
+        if (array.length <= 1) {
+            return;
+        }
+
+        int mid = array.length / 2;
+        DoctorWorkload[] left = new DoctorWorkload[mid];
+        DoctorWorkload[] right = new DoctorWorkload[array.length - mid];
+
+        for (int i = 0; i < mid; i++) {
+            left[i] = array[i];
+        }
+        for (int i = mid; i < array.length; i++) {
+            right[i - mid] = array[i];
+        }
+
+        mergeSort(left, comparator);
+        mergeSort(right, comparator);
+
+        merge(array, left, right, comparator);
     }
 
-    public int getDoctorCount() {
-        return doctorList.getNumberOfEntries();
-    }
+    private void merge(DoctorWorkload[] result, DoctorWorkload[] left, DoctorWorkload[] right, Comparator<DoctorWorkload> comparator) {
+        int i = 0, j = 0, k = 0;
 
-    public boolean isDoctorListEmpty() {
-        return doctorList.isEmpty();
-    }
+        while (i < left.length && j < right.length) {
+            if (comparator.compare(left[i], right[j]) <= 0) {
+                result[k++] = left[i++];
+            } else {
+                result[k++] = right[j++];
+            }
+        }
 
-    public boolean isDoctorListFull() {
-        return doctorList.isFull();
-    }
-
-    public void clearAllDoctors() {
-        doctorList.clear();
-        idCounter = 1;
-    }
-
-    public Doctor getDoctorAtPosition(int position) {
-        try {
-            return doctorList.getEntry(position);
-        } catch (IndexOutOfBoundsException e) {
-            return null;
+        while (i < left.length) {
+            result[k++] = left[i++];
+        }
+        while (j < right.length) {
+            result[k++] = right[j++];
         }
     }
 
-    public boolean replaceDoctorAtPosition(int position, Doctor newDoctor) {
-        return doctorList.replace(position, newDoctor);
+    ////////////////////////////// Specialty Report ////////////////////////////// 
+
+    public void generateSpecialtyReport() {
+        System.out.println("\n=== Specialty Availability Matrix ===");
+        System.out.println("MON TUE WED THU FRI  SPECIALTY       COVERAGE");
+        System.out.println("---------------------------------------------");
+
+        Doctor[] doctors = getAllDoctors();
+        String[] specialties = extractUniqueSpecialties(doctors);
+        SpecialtySummary[] summaries = new SpecialtySummary[specialties.length];
+
+        // Initialize summaries
+        for (int i = 0; i < specialties.length; i++) {
+            summaries[i] = new SpecialtySummary(specialties[i]);
+        }
+
+        // Populate data
+        for (Doctor doctor : doctors) {
+            for (SpecialtySummary summary : summaries) {
+                if (summary.specialty.equals(doctor.getSpecialization())) {
+                    summary.totalCount++;
+                    if (doctor.isAvailable()) {
+                        summary.availableCount++;
+                    }
+                    // Count duties for each day
+                    for (int day = 0; day < DAYS; day++) {
+                        if (isDoctorOnDuty(doctor, day)) {
+                            summary.dailyCoverage[day]++;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Sort by coverage rate (descending)
+        bubbleSortSpecialtiesByCoverage(summaries);
+
+        // Display matrix
+        for (SpecialtySummary summary : summaries) {
+            // Display daily coverage symbols
+            for (int day = 0; day < DAYS; day++) {
+                String symbol = getCoverageSymbol(summary, day);
+                System.out.print(symbol + "   ");
+            }
+
+            // Calculate coverage percentage
+            int totalPossibleSlots = summary.totalCount * DAYS;
+            int actualCoverage = 0;
+            for (int day = 0; day < DAYS; day++) {
+                actualCoverage += summary.dailyCoverage[day];
+            }
+            double coverageRate = totalPossibleSlots > 0
+                    ? (double) actualCoverage / totalPossibleSlots * 100 : 0;
+
+            System.out.printf("  %-15s %3.0f%% (%d/%d)%n",
+                    summary.specialty, coverageRate, actualCoverage, totalPossibleSlots);
+        }
+
+        System.out.println("---------------------------------------------");
+        System.out.println("G = Fully covered  X = Understaffed  / = Partial");
+        System.out.println("=== End of Specialty Report ===");
     }
 
-    public boolean insertDoctorAtPosition(int position, Doctor doctor) {
-        if (findDoctorById(doctor.getDoctorID()) != null) {
-            return false; // Duplicate ID
+    private String getCoverageSymbol(SpecialtySummary summary, int day) {
+        int doctorsInSpecialty = summary.totalCount;
+        int doctorsScheduled = summary.dailyCoverage[day];
+
+        if (doctorsInSpecialty == 0) {
+            return "x"; // No doctors in this specialty
         }
-        if (findDoctorByEmail(doctor.getEmail()) != null) {
-            return false; // Duplicate email
-        }
-        try {
-            return doctorList.add(position, doctor);
-        } catch (IndexOutOfBoundsException e) {
-            return false;
+
+        double coverageRatio = (double) doctorsScheduled / doctorsInSpecialty;
+
+        if (coverageRatio >= 0.8) {
+            return "G"; // Good coverage (80-100%)
+        } else if (coverageRatio >= 0.4) {
+            return "/"; // Partial coverage (40-79%)
+        } else {
+            return "X"; // Poor coverage (0-39%)
         }
     }
+
+    private void bubbleSortSpecialtiesByCoverage(SpecialtySummary[] summaries) {
+        boolean swapped;
+        int n = summaries.length;
+
+        for (int i = 0; i < n - 1; i++) {
+            swapped = false;
+            for (int j = 0; j < n - i - 1; j++) {
+                // Calculate coverage rates
+                double coverage1 = calculateTotalCoverageRate(summaries[j]);
+                double coverage2 = calculateTotalCoverageRate(summaries[j + 1]);
+
+                if (coverage1 < coverage2) {
+                    // Swap
+                    SpecialtySummary temp = summaries[j];
+                    summaries[j] = summaries[j + 1];
+                    summaries[j + 1] = temp;
+                    swapped = true;
+                }
+            }
+            if (!swapped) {
+                break;
+            }
+        }
+    }
+
+    private double calculateTotalCoverageRate(SpecialtySummary summary) {
+        int totalPossibleSlots = summary.totalCount * DAYS;
+        if (totalPossibleSlots == 0) {
+            return 0;
+        }
+
+        int actualCoverage = 0;
+        for (int day = 0; day < DAYS; day++) {
+            actualCoverage += summary.dailyCoverage[day];
+        }
+
+        return (double) actualCoverage / totalPossibleSlots * 100;
+    }
+
+    class SpecialtySummary {
+
+        String specialty;
+        int availableCount;
+        int totalCount;
+        int[] dailyCoverage; // Tracks coverage for each day (0-4 for Mon-Fri)
+
+        SpecialtySummary(String specialty) {
+            this.specialty = specialty;
+            this.availableCount = 0;
+            this.totalCount = 0;
+            this.dailyCoverage = new int[DAYS]; // Initialize with zeros
+        }
+    }
+
+// Helper method to extract unique specialties
+    private String[] extractUniqueSpecialties(Doctor[] doctors) {
+        String[] temp = new String[doctors.length];
+        int uniqueCount = 0;
+
+        for (Doctor doctor : doctors) {
+            boolean found = false;
+            for (int i = 0; i < uniqueCount; i++) {
+                if (temp[i].equals(doctor.getSpecialization())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                temp[uniqueCount++] = doctor.getSpecialization();
+            }
+        }
+
+        String[] result = new String[uniqueCount];
+        for (int i = 0; i < uniqueCount; i++) {
+            result[i] = temp[i];
+        }
+        return result;
+    }
+
+    ////////////////////////////// End of Specialty Report ////////////////////////////// 
+
+
+    // Helper classes
+    class DoctorWorkload {
+
+        Doctor doctor;
+        int dutyCount;
+
+        DoctorWorkload(Doctor doctor, int dutyCount) {
+            this.doctor = doctor;
+            this.dutyCount = dutyCount;
+        }
+    }
+
 }

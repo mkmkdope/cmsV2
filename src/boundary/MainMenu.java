@@ -13,7 +13,7 @@ import dao.DoctorDAO;
 import entity.Patient;
 import entity.Treatment;
 import java.util.Scanner;
-
+import entity.Doctor;
 /**
  *
  * @author USER
@@ -51,10 +51,8 @@ public void getUserChoice() {
                         break;
                     case 2:
                         System.out.println("\nRedirecting to Doctor Management...");
-                        DoctorDAO doctorDAO = new DoctorDAO();
-                        DoctorManager doctorManager = new DoctorManager(doctorDAO);
-                        DoctorMenu doctorMenu = new DoctorMenu(doctorManager);
-                        doctorMenu.start();
+                        DoctorMenu doctorMenu = new DoctorMenu();
+                        doctorMenu.displayMenu();
                         break;
                     case 3:
                         System.out.println("\nRedirecting to Consultation Management...");
