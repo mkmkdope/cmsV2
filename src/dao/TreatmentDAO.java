@@ -37,30 +37,37 @@ public class TreatmentDAO {
         return t;
     }
 
-    private void initializeData() {
-        // Get existing data from other modules for consistency
-        PatientDAO patientDAO = new PatientDAO();
-        ListInterface<Patient> patients = patientDAO.getAllPatients();
-        
+private void initializeData() {
+    // Get existing data from other modules for consistency
+    PatientDAO patientDAO = new PatientDAO();
+    ListInterface<Patient> patients = patientDAO.getAllPatients();
+    
     // Get doctors from DoctorManager instead of DoctorInitializer
     DoctorManager doctorManager = new DoctorManager();
     Doctor[] doctorsArray = doctorManager.getAllDoctors();
     
-    // Convert array to list for compatibility
+    // Convert array to list
     CircularDoublyLinkedList<Doctor> doctors = new CircularDoublyLinkedList<>();
     for (Doctor doctor : doctorsArray) {
         doctors.add(doctor);
     }
-        
-        // create new consultations to ensure data consistency
+    
+    // Check if we have enough patients and doctors
+    if (patients.getNumberOfEntries() < 2 || doctors.getNumberOfEntries() < 2) {
+        System.out.println("Warning: Not enough sample data for treatments initialization");
+        return;
+    }
+    
+    try {
+        // Use safe access with bounds checking
         Patient p1 = patients.getEntry(1);
-        Patient p2 = patients.getEntry(2);
-        Patient p3 = patients.getEntry(3);
-        Patient p4 = patients.getEntry(4);
+        Patient p2 = patients.getEntry(Math.min(2, patients.getNumberOfEntries()));
+        Patient p3 = patients.getEntry(Math.min(3, patients.getNumberOfEntries()));
+        Patient p4 = patients.getEntry(Math.min(4, patients.getNumberOfEntries()));
         
         Doctor d1 = doctors.getEntry(1);
-        Doctor d2 = doctors.getEntry(2);
-        Doctor d3 = doctors.getEntry(3);
+        Doctor d2 = doctors.getEntry(Math.min(2, doctors.getNumberOfEntries()));
+        Doctor d3 = doctors.getEntry(Math.min(3, doctors.getNumberOfEntries()));
 
         // create consultations using the existing data
         Consultation c1 = new Consultation("C0001", p1, d1,
@@ -102,7 +109,12 @@ public class TreatmentDAO {
         treatmentList.add(t4);
         treatmentList.add(t5);
         treatmentList.add(t6);
+        
+    } catch (Exception e) {
+        System.out.println("Warning: Could not initialize sample treatment data: " + e.getMessage());
+        e.printStackTrace();
     }
+}
 
     public void add(Treatment treatment) {
         treatmentList.add(treatment);
