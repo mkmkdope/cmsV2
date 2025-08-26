@@ -743,4 +743,9 @@ public class TreatmentMenu {
         }
     }
 
+        public static void main(String[] args) {
+                       TreatmentMenu treatmentMenu = new TreatmentMenu();
+                        treatmentMenu.runTreatmentMenu();
+    }
+    
 }

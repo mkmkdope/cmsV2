@@ -20,7 +20,7 @@ public class PatientDAO {
 
     public PatientDAO(){
         // Default patients
-        addPatient(new Patient(generatePatientId(), "010101010101", "Alice Tan", "Female", 22,
+         addPatient(new Patient(generatePatientId(), "010101010101", "Alice Tan", "Female", 22,
                 "012345678901", "Kuala Lumpur", "alice@example.com", "No allergies"));
         addPatient(new Patient(generatePatientId(), "990202020202", "John Lee", "Male", 30,
                 "013876543210", "Selangor", "john@example.com", "Asthma"));
@@ -40,6 +40,8 @@ public class PatientDAO {
                 "011223344556", "Shah Alam", "aisyah@example.com", "Eczema"));
         addPatient(new Patient(generatePatientId(), "890101010101", "Michael Lim", "Male", 36,
                 "015998877665", "Seremban", "michaellim@example.com", "Lactose intolerance"));
+        
+        
     }
 
     public String generatePatientId() {
@@ -58,7 +60,7 @@ public class PatientDAO {
         return patientList.add(patient);
     }
 
-    // Fixed: Updated to use correct priority comparator
+ 
     public boolean addPatientWithPriority(Patient patient, int priority){
         if(findPatientById(patient.getPatientId()) != null) {
             return false;
@@ -109,7 +111,6 @@ public class PatientDAO {
     }
 
     public Patient findPatientById(String id){
-        // Using the new searchByKey method for better performance
         Comparator<Patient> idComparator = (p1, p2) -> p1.getPatientId().compareToIgnoreCase(p2.getPatientId());
         Patient searchKey = new Patient(id, "", "", "", 0, "", "", "", "");
         
@@ -117,8 +118,7 @@ public class PatientDAO {
         if (index != -1) {
             return patientList.getEntry(index);
         }
-        
-        // Fallback to traversal method
+      
         final Patient[] result = {null};
         for(Patient patient : patientList ){
             if (patient.getPatientId().equalsIgnoreCase(id) && result[0] == null) {
@@ -129,7 +129,6 @@ public class PatientDAO {
     }
 
     public Patient findPatientByIC(String ic) {
-        // Using traversal for IC search (since IC is not the primary comparison key)
         final Patient[] result = {null};
        for(Patient patient : patientList){
             if (patient.getIcNumber().equalsIgnoreCase(ic) && result[0] == null) {
@@ -162,12 +161,7 @@ public class PatientDAO {
         return patientList;
     }
 
-    //get the circularDoublyLinkedList directly for traversal operations
-    public ListInterface<Patient> getPatientListForTraversal(){
-        return patientList;
-    }
-
-    // Methods utilizing adt functions
+    
     public boolean containsPatient(Patient patient) {
         return patientList.contains(patient);
     }
@@ -215,7 +209,7 @@ public class PatientDAO {
         }
     }
 
-    // Enhanced search methods using the new searchByKey functionality
+   
     public Patient searchPatientByName(String name) {
         Comparator<Patient> nameComparator = (p1, p2) -> p1.getName().compareToIgnoreCase(p2.getName());
         Patient searchKey = new Patient("", "", name, "", 0, "", "", "", "");
@@ -238,42 +232,11 @@ public class PatientDAO {
         return null;
     }
 
-    // Method to sort patients using the new MergeSort functionality
     public void sortPatients(Comparator<Patient> comparator) {
         patientList.mergeSort(comparator);
     }
 
-    // // Additional utility methods
-    // public void displayPatientStatistics() {
-    //     System.out.println("=== Patient Statistics ===");
-    //     System.out.println("Total Patients: " + getPatientCount());
-    //     System.out.println("List Empty: " + isPatientListEmpty());
-    //     System.out.println("List Full: " + isPatientListFull());
-    // }
-
-    // // Method to get all patients matching a criteria using traversal
-    // public ListInterface<Patient> findPatientsByCriteria(java.util.function.Predicate<Patient> criteria) {
-    //     ListInterface<Patient> matchingPatients = new CircularDoublyLinkedList<>();
-        
-    //    for (Patient patient : patientList){
-    //         if (criteria.test(patient)) {
-    //             matchingPatients.add(patient);
-    //         }
-    //     }
-        
-    //     return matchingPatients;
-    // }
-
-    // // Batch operations using traversal
-    // public void updateAllPatientsEmail(String domain) {
-    //      for(Patient patient : patientList){
-    //         if (patient.getEmail().isEmpty()) {
-    //             String newEmail = patient.getName().toLowerCase().replaceAll("\\s+", "") + "@" + domain;
-    //             patient.setEmail(newEmail);
-    //         }
-    //     }
-    // }
-
+  
 
 
 
