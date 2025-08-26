@@ -2,7 +2,7 @@ package dao;
 
 import adt.CircularDoublyLinkedList;
 import entity.Doctor;
-import java.util.Comparator;
+//import java.util.Comparator;
 
 public class DoctorDAO {
 
@@ -63,12 +63,6 @@ public class DoctorDAO {
         for (int i = 0; i < doctorList.size(); i++) {
             doctors[i] = doctorList.getEntry(i + 1);
         }
-        return doctors;
-    }
-
-    public Doctor[] getDoctorsSortedById() {
-        Doctor[] doctors = getAllDoctors();
-        insertionSortById(doctors);
         return doctors;
     }
 
@@ -175,38 +169,61 @@ public class DoctorDAO {
         dutySchedule.generateBaseSchedule();
     }
 
-    public void generateDutyReport() {
-        System.out.println("\n=== Duty Report (Sorted by ID) ===");
-        System.out.println("ID   Name                 Mon Tue Wed Thu Fri");
+    ////////////////////////////// Duty Report //////////////////////////////
+public void generateDutyReport() {
+        System.out.println("\n--- TARUMT CLINIC MANAGEMENT SYSTEM ---");
+        System.out.println("----- Duty Schedule Report ------");
+        System.out.println("ID   Name                 Mon Tue Wed Thu Fri Total");
         System.out.println("---------------------------------------------");
 
         Doctor[] doctors = getDoctorsSortedById();
-        int totalScheduledDuties = 0;
+        int[] dayTotals = new int[5]; // Mon-Fri totals
+        int grandTotal = 0;
+        int onLeaveCount = 0;
 
         for (Doctor doctor : doctors) {
             System.out.printf("%-5s %-20s", doctor.getDoctorId(), doctor.getName());
 
+            int doctorTotal = 0;
             for (int day = 0; day < 5; day++) {
                 boolean isOnDuty = isDoctorOnDuty(doctor, day);
                 boolean isOnLeave = !doctor.isAvailable();
 
                 if (isOnDuty && !isOnLeave) {
-                    System.out.print(" *  ");
-                    totalScheduledDuties++;
+                    System.out.print("  o ");
+                    doctorTotal++;
+                    dayTotals[day]++;
+                    grandTotal++;
                 } else if (isOnLeave) {
-                    System.out.print(" x  ");
+                    System.out.print("  x ");
                 } else {
                     System.out.print("    ");
                 }
             }
-            System.out.println();
+            System.out.printf(" %2d%n", doctorTotal);
+
+            if (!doctor.isAvailable()) {
+                onLeaveCount++;
+            }
         }
 
         System.out.println("---------------------------------------------");
+        System.out.println("o = OnDuty, x = OnLeave");
+        System.out.printf("Mon: %d | Tue: %d | Wed: %d | Thu: %d | Fri: %d%n",
+                dayTotals[0], dayTotals[1], dayTotals[2], dayTotals[3], dayTotals[4]);
+        System.out.println("Total Scheduled Duties: " + grandTotal);
+
+        int availableDoctors = doctors.length - onLeaveCount;
+        System.out.println("Doctors available: " + availableDoctors);
+        System.out.println("Doctors on Leave: " + onLeaveCount);
         System.out.println("Total Doctors: " + doctors.length);
-        System.out.println("Total Scheduled Duties: " + totalScheduledDuties);
-        System.out.println("Maximum Duties Per Week: " + (5 * MAX_SLOTS));
-        System.out.println("=== End Of Report ===");
+        System.out.println("\n----- End Of Report -----\n");
+    }
+
+    public Doctor[] getDoctorsSortedById() {
+        Doctor[] doctors = getAllDoctors();
+        insertionSortById(doctors);
+        return doctors;
     }
 
     private boolean isDoctorOnDuty(Doctor doctor, int dayIndex) {
@@ -219,7 +236,11 @@ public class DoctorDAO {
         return false;
     }
 
-    ////////////////////////////// Workload Report [Sorted by Duties] //////////////////////////////
+    ////////////////////////////// End of Report //////////////////////////////
+
+
+
+    ////////////////////////////// Workload Report //////////////////////////////
 public void generateWorkloadReport() {
         System.out.println("\n--- TARUMT CLINIC MANAGEMENT SYSTEM ---");
         System.out.println("----- Workload Analysis Report -----");
@@ -384,47 +405,45 @@ private int countDuties(Doctor doctor) {
         return count;
     }
 
-    private void mergeSort(DoctorWorkload[] array, Comparator<DoctorWorkload> comparator) {
-        if (array.length <= 1) {
-            return;
-        }
-
-        int mid = array.length / 2;
-        DoctorWorkload[] left = new DoctorWorkload[mid];
-        DoctorWorkload[] right = new DoctorWorkload[array.length - mid];
-
-        for (int i = 0; i < mid; i++) {
-            left[i] = array[i];
-        }
-        for (int i = mid; i < array.length; i++) {
-            right[i - mid] = array[i];
-        }
-
-        mergeSort(left, comparator);
-        mergeSort(right, comparator);
-
-        merge(array, left, right, comparator);
-    }
-
-    private void merge(DoctorWorkload[] result, DoctorWorkload[] left, DoctorWorkload[] right, Comparator<DoctorWorkload> comparator) {
-        int i = 0, j = 0, k = 0;
-
-        while (i < left.length && j < right.length) {
-            if (comparator.compare(left[i], right[j]) <= 0) {
-                result[k++] = left[i++];
-            } else {
-                result[k++] = right[j++];
-            }
-        }
-
-        while (i < left.length) {
-            result[k++] = left[i++];
-        }
-        while (j < right.length) {
-            result[k++] = right[j++];
-        }
-    }
-
+//    private void mergeSort(DoctorWorkload[] array, Comparator<DoctorWorkload> comparator) {
+//        if (array.length <= 1) {
+//            return;
+//        }
+//
+//        int mid = array.length / 2;
+//        DoctorWorkload[] left = new DoctorWorkload[mid];
+//        DoctorWorkload[] right = new DoctorWorkload[array.length - mid];
+//
+//        for (int i = 0; i < mid; i++) {
+//            left[i] = array[i];
+//        }
+//        for (int i = mid; i < array.length; i++) {
+//            right[i - mid] = array[i];
+//        }
+//
+//        mergeSort(left, comparator);
+//        mergeSort(right, comparator);
+//
+//        merge(array, left, right, comparator);
+//    }
+//    private void merge(DoctorWorkload[] result, DoctorWorkload[] left, DoctorWorkload[] right, Comparator<DoctorWorkload> comparator) {
+//        int i = 0, j = 0, k = 0;
+//
+//        while (i < left.length && j < right.length) {
+//            if (comparator.compare(left[i], right[j]) <= 0) {
+//                result[k++] = left[i++];
+//            } else {
+//                result[k++] = right[j++];
+//            }
+//        }
+//
+//        while (i < left.length) {
+//            result[k++] = left[i++];
+//        }
+//        while (j < right.length) {
+//            result[k++] = right[j++];
+//        }
+//    }
     ////////////////////////////// Specialty Report ////////////////////////////// 
 
     public void generateSpecialtyReport() {

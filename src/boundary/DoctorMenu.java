@@ -3,6 +3,7 @@ package boundary;
 import control.DoctorManager;
 import entity.Doctor;
 import java.util.Scanner;
+import utility.ConfirmationMsg;
 
 public class DoctorMenu {
 
@@ -44,9 +45,9 @@ public class DoctorMenu {
             System.out.println("3. Search Doctor by ID");
             System.out.println("4. Edit Doctor");
             System.out.println("5. Update Availability");
-            System.out.println("6. Duty Report");
-            System.out.println("7. Add Doctor to Duty Day");
-            System.out.println("8. Remove Doctor from Duty Day");
+            System.out.println("6. Duty Schedule Report");
+            System.out.println("7. Add Doctor Duty");
+            System.out.println("8. Remove Doctor Duty");
             System.out.println("9. Reset Schedule"); //Regenerate
             System.out.println("10. Workload Analysis Report");
             System.out.println("11. Specialty Availability Report");
@@ -191,7 +192,7 @@ public class DoctorMenu {
     private void searchDoctor() {
         System.out.println("\nSearching Doctor...");
         System.out.print("Enter Doctor ID to search: ");
-        String id = scanner.nextLine();
+        String id = scanner.nextLine().trim().toUpperCase();
         Doctor doctor = doctorManager.searchDoctor(id);
 
         if (doctor != null) {
@@ -204,7 +205,7 @@ public class DoctorMenu {
     private void editDoctor() {
         System.out.println("\nEditing profile...");
         System.out.print("Enter Doctor ID to edit: ");
-        String id = scanner.nextLine();
+        String id = scanner.nextLine().trim().toUpperCase();
 
         Doctor doctor = doctorManager.searchDoctor(id);
         if (doctor != null) {
@@ -243,7 +244,7 @@ public class DoctorMenu {
     //should not delete doctor profile just set as active or inactive 
     private void removeDoctor() {
         System.out.print("Enter Doctor ID to remove: ");
-        String id = scanner.nextLine();
+        String id = scanner.nextLine().trim().toUpperCase();
 
         if (doctorManager.removeDoctor(id)) {
             System.out.println("Doctor removed successfully!");
@@ -261,7 +262,7 @@ public class DoctorMenu {
     private void updateAvailability() {
         System.out.println("\nUpdating Availability...");
         System.out.print("Enter Doctor ID: ");
-        String id = scanner.nextLine();
+        String id = scanner.nextLine().trim().toUpperCase();
 
         Doctor doctor = doctorManager.searchDoctor(id);
         if (doctor != null) {
@@ -286,11 +287,17 @@ public class DoctorMenu {
                 }
             } while (!validInput);
 
-            if (doctorManager.updateAvailability(id, available)) {
-                String status = available ? "Available" : "On Leave";
-                System.out.println("Availability updated successfully! Doctor is now: " + status);
+            ConfirmationMsg.displayConfirmationMessage();
+            String confirmation = scanner.nextLine().trim().toLowerCase();
+            if (confirmation.equals("yes")) {
+                if (doctorManager.updateAvailability(id, available)) {
+                    String status = available ? "Available" : "On Leave";
+                    System.out.println("Availability updated successfully! Doctor is now: " + status);
+                } else {
+                    System.out.println("Failed to update availability!");
+                }
             } else {
-                System.out.println("Failed to update availability!");
+                System.out.println("Availability update cancelled.");
             }
         } else {
             System.out.println("Doctor not found!");
@@ -317,7 +324,7 @@ public class DoctorMenu {
             }
 
             System.out.print("\nEnter Doctor ID to add: ");
-            String doctorId = scanner.nextLine();
+            String doctorId = scanner.nextLine().trim().toUpperCase();
 
             if (doctorManager.addDoctorToDutyDay(dayIndex, doctorId)) {
                 System.out.println("Doctor successfully added to duty!");
@@ -351,12 +358,19 @@ public class DoctorMenu {
             }
 
             System.out.print("\nEnter Doctor ID to remove: ");
-            String doctorId = scanner.nextLine();
+            String doctorId = scanner.nextLine().trim().toUpperCase();
 
-            if (doctorManager.removeDoctorFromDutyDay(dayIndex, doctorId)) {
-                System.out.println("Doctor successfully removed from duty!");
+            ConfirmationMsg.displayConfirmationMessage();
+            String confirmation = scanner.nextLine().trim().toLowerCase();
+
+            if (confirmation.equals("yes")) {
+                if (doctorManager.removeDoctorFromDutyDay(dayIndex, doctorId)) {
+                    System.out.println("Doctor successfully removed from duty!");
+                } else {
+                    System.out.println("Failed to remove doctor from duty.");
+                }
             } else {
-                System.out.println("Failed to remove doctor from duty.");
+                System.out.println("Doctor removal from duty cancelled.");
             }
         } catch (Exception e) {
             System.out.println("Error: Invalid input. Please enter numbers for day index.");
@@ -374,9 +388,15 @@ public class DoctorMenu {
 
     private void regenerateSchedule() {
         System.out.println("\nRegenerating Schedule...");
-        doctorManager.regenerateSchedule();
-        System.out.println("Doctor Duty Schedule is Ready!");
-        //doctorManager.displayDutySchedule();
+        ConfirmationMsg.displayConfirmationMessage();
+        String confirmation = scanner.nextLine().trim().toLowerCase();
+
+        if (confirmation.equals("yes")) {
+            doctorManager.regenerateSchedule();
+            System.out.println("Doctor Duty Schedule is Ready!");
+        } else {
+            System.out.println("Schedule regeneration cancelled.");
+        }
     }
 
     //for testing
