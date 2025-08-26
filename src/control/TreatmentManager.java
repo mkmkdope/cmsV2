@@ -37,7 +37,6 @@ public class TreatmentManager {
     public void showAvailableTransitions(String treatmentId) {
         Treatment treatment = getTreatmentById(treatmentId);
         if (treatment == null) {
-            System.out.println("Treatment not found: " + treatmentId);
             return;
         }
         
@@ -47,13 +46,13 @@ public class TreatmentManager {
         
         if (current.equals(STATUS_PENDING)) {
             System.out.println("Available transitions:");
-            System.out.println("   → COMPLETED (when medicine is dispensed)");
+            System.out.println("COMPLETED [when medicine is dispensed]");
             
             // check if stock is available for COMPLETED transition
             if (canDispenseMedicine(treatmentId)) {
-                System.out.println("Stock check: Available - can dispense medicine");
+                System.out.println("Stock Check: Available - can dispense medicine");
         } else {
-                System.out.println("Stock check: Insufficient - cannot dispense medicine");
+                System.out.println("Stock Check: Insufficient - cannot dispense medicine");
                 System.out.println("   Please restock medicine first");
             }
         } else if (current.equals(STATUS_COMPLETED)) {
@@ -65,11 +64,9 @@ public class TreatmentManager {
     
     
      // check if medicine can be dispensed (stock available)
-    
     public boolean canDispenseMedicine(String treatmentId) {
         Treatment treatment = getTreatmentById(treatmentId);
         if (treatment == null) {
-            System.out.println("Treatment not found: " + treatmentId);
             return false;
         }
         
@@ -85,7 +82,7 @@ public class TreatmentManager {
         Pharmacy med = findMedicine(medicineName);
         if (med == null) {
             System.out.println("Medicine '" + medicineName + "' not found in pharmacy");
-            System.out.println("Action: Check medicine name or restock the medicine");
+            System.out.println("ACTION: Check medicine name or restock the medicine");
             return false;
         }
         
@@ -94,7 +91,7 @@ public class TreatmentManager {
             System.out.println("   Required: " + requiredQty + " units");
             System.out.println("   Available: " + med.getMedQty() + " units");
             System.out.println("   Shortage: " + (requiredQty - med.getMedQty()) + " units");
-            System.out.println("Action: Restock medicine before dispensing");
+            System.out.println("ACTION: Restock medicine before dispensing");
             return false;
         }
         
@@ -110,61 +107,59 @@ public class TreatmentManager {
     private final PharmacyManager pharmacyManager = new PharmacyManager();
     private final ConsultationManager consultationManager = new ConsultationManager();
 
-public Treatment addTreatment(Consultation consultation, String diagnosis,
-                              String prescribed, int prescribedQty, String status) {
-    String today = java.time.LocalDate.now().toString();
+    public Treatment addTreatment(Consultation consultation, String diagnosis,
+                                  String prescribed, int prescribedQty, String status) {
+        String today = java.time.LocalDate.now().toString();
 
-    // create treatment ID
-    String treatmentID = "T" + String.format("%04d", dao.size() + 1);
+        // create treatment ID
+        String treatmentID = "T" + String.format("%04d", dao.size() + 1);
 
-    // check medicine exists in pharmacy
-    Pharmacy medicine = null;
-    ListInterface<Pharmacy> allMedicines = pharmacyManager.getAllMedicines();
-    for (int i = 1; i <= allMedicines.getNumberOfEntries(); i++) {
-        Pharmacy m = allMedicines.getEntry(i);
-        if (m.getMedID().equalsIgnoreCase(prescribed) ||
-            m.getMedName().equalsIgnoreCase(prescribed)) {
-            medicine = m;
-            break;
-        }
-    }
-
-    if (medicine == null) {
-        System.out.println("Medicine not found in pharmacy: " + prescribed);
-        System.out.println("Please check the medicine name or ID. Available medicines:");
+        // check medicine exists in pharmacy
+        Pharmacy medicine = null;
+        ListInterface<Pharmacy> allMedicines = pharmacyManager.getAllMedicines();
         for (int i = 1; i <= allMedicines.getNumberOfEntries(); i++) {
             Pharmacy m = allMedicines.getEntry(i);
-            System.out.println("   " + m.getMedID() + " - " + m.getMedName());
+            if (m.getMedID().equalsIgnoreCase(prescribed) ||
+                m.getMedName().equalsIgnoreCase(prescribed)) {
+                medicine = m;
+                break;
+            }
         }
-        return null; // medicine truly not found
-    }
 
-    // create treatment object
-    Treatment t = new Treatment(treatmentID, consultation, diagnosis, 
-                  medicine.getMedName(), prescribedQty, today, "Pending");
-
-
-    // check stock
-    if (prescribedQty > medicine.getMedQty()) {
-        System.out.println("Warning: Not enough stock for " + medicine.getMedName());
-        System.out.println("Requested: " + prescribedQty + ", Available: " + medicine.getMedQty());
-        System.out.println("Treatment created as Pending. Please restock before dispensing.");
-        // Do not deduct stock yet
-    } else {
-        // stock sufficient → deduct immediately if status is Completed
-        if (status.equalsIgnoreCase("Completed")) {
-            medicine.setMedQty(medicine.getMedQty() - prescribedQty);
-            t.setTreatmentStatus("Completed");
+        if (medicine == null) {
+            System.out.println("Medicine not found in pharmacy: " + prescribed);
+            System.out.println("Please check the medicine name or ID. Available medicines:");
+            for (int i = 1; i <= allMedicines.getNumberOfEntries(); i++) {
+                Pharmacy m = allMedicines.getEntry(i);
+                System.out.println("   " + m.getMedID() + " - " + m.getMedName());
+            }
+            return null; 
         }
-    }
 
-    dao.add(t);
-    return t;
-}
+        // create treatment object
+        Treatment t = new Treatment(treatmentID, consultation, diagnosis, 
+                      medicine.getMedName(), prescribedQty, today, "Pending");
+
+
+        // check stock
+        if (prescribedQty > medicine.getMedQty()) {
+            System.out.println("WARNING: Not enough stock for " + medicine.getMedName());
+            System.out.println("Requested: " + prescribedQty + ", Available: " + medicine.getMedQty());
+            System.out.println("Treatment created as Pending. Please restock before dispensing.");
+        } else {
+            // stock sufficient to deduct immediately if status is Completed
+            if (status.equalsIgnoreCase("Completed")) {
+                medicine.setMedQty(medicine.getMedQty() - prescribedQty);
+                t.setTreatmentStatus("Completed");
+            }
+        }
+
+        dao.add(t);
+        return t;
+    }
 
     
-    // only for doctor
-    // update diagnosis, prescribed, qty
+    // update diagnosis, prescribed, qty without status
     public boolean updateTreatment(String id, String diagnosis, String prescribed, Integer prescribedQty) {
         Treatment treatment = dao.findByID(id);
             if (treatment == null) {
@@ -172,12 +167,12 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
                 return false;
             }
 
-            // block update if treatment is already Completed
+            // cannot update if treatment is already Completed
             if (!canUpdateTreatment(id)) {
                 return false;
             }
 
-            // validate prescribed medicine (if provided)
+            // validate prescribed medicine
             String finalPrescribed = null;
             if (prescribed != null && !prescribed.isBlank()) {
                 Pharmacy med = findMedicine(prescribed);
@@ -188,24 +183,16 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
                 finalPrescribed = med.getMedName(); // normalize to actual pharmacy name
             }
 
-            // update fields (diagnosis, prescribed, qty) — but NOT status
+            // update fields (diagnosis, prescribed, qty) but NOT status
             return dao.updateFields(id, diagnosis, finalPrescribed, prescribedQty, null);
     }
-
-
-
-
-    // update only the status of a treatment (without changing diagnosis/prescription)
-    // this is useful when you only want to change status from PENDING to COMPLETED
     
     public boolean updateTreatmentStatusOnly(String id, String status) {
         Treatment treatment = dao.findByID(id);
         if (treatment == null) {
-            System.out.println("Treatment not found: " + id);
             return false;
         }
-        
-        // Check if treatment can be updated
+       
         if (!canUpdateTreatment(id)) {
             return false;
         }
@@ -213,14 +200,11 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
         return updateTreatmentStatus(id, status);
     }
     
-    
-    // check if a treatment can be updated
-    // COMPLETED treatments cannot be updated
-    
+   
+    //check if treatment can be updated
     public boolean canUpdateTreatment(String id) {
         Treatment treatment = dao.findByID(id);
         if (treatment == null) {
-            System.out.println("Treatment not found: " + id);
             return false;
         }
         
@@ -234,9 +218,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
         return true;
     }
     
-    
     // display current treatment details
-    
     public void displayTreatmentDetails(String id) {
         Treatment treatment = dao.findByID(id);
         if (treatment == null) {
@@ -286,14 +268,14 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
 
         String currentStatus = treatment.getTreatmentStatus();
 
-        // COMPLETED → Any other status: Not allowed
+        // COMPLETED to PENDING is Not allowed
         if (currentStatus.equals(STATUS_COMPLETED)) {
             System.out.println("Cannot change status of completed treatment.");
             System.out.println("Medicine has already been dispensed to patient.");
             return false;
         }
 
-        // PENDING → COMPLETED: check stock & deduct
+        // PENDING to COMPLETED need to check stock & deduct
         if (currentStatus.equals(STATUS_PENDING) && finalStatus.equals(STATUS_COMPLETED)) {
             Pharmacy medicine = null;
             ListInterface<Pharmacy> allMedicines = pharmacyManager.getAllMedicines();
@@ -340,7 +322,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
             return true;
         }
 
-        // PENDING → PENDING: nothing changes
+        // PENDING to PENDING: nothing will change
         if (currentStatus.equals(STATUS_PENDING) && finalStatus.equals(STATUS_PENDING)) {
             System.out.println("Treatment is already in PENDING status.");
             return true;
@@ -351,56 +333,6 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
         showAvailableTransitions(id);
         return false;
     }
-
-//    private boolean dispenseMedicineFromPending(String treatmentId) {
-//        Treatment treatment = dao.findByID(treatmentId);
-//        if (treatment == null) {
-//            System.out.println("Treatment not found: " + treatmentId);
-//            return false;
-//        }
-//
-//        // Check if medicine is available
-//        String medicineName = treatment.getPrescribed();
-//        int requiredQty = treatment.getPrescribedQty();
-//
-//        Pharmacy med = findMedicine(medicineName);
-//        if (med == null) {
-//            System.out.println("Medicine '" + medicineName + "' not found in pharmacy");
-//            System.out.println("Cannot dispense medicine - medicine unavailable");
-//            return false;
-//        }
-//
-//        if (med.getMedQty() < requiredQty) {
-//            System.out.println("Insufficient medicine stock! Required: " + requiredQty + ", Available: " + med.getMedQty());
-//            System.out.println("Cannot dispense medicine - please restock medicine first");
-//            return false;
-//        }
-//
-//        // Deduct stock
-//        boolean stockDeducted = pharmacyManager.restockMedicine(med.getMedID(), -requiredQty);
-//        if (!stockDeducted) {
-//            System.out.println("Failed to deduct medicine stock. Medicine cannot be dispensed.");
-//            return false;
-//        }
-//
-//        // update treatment status
-//        boolean updated = dao.updateFields(treatmentId, null, null, null, STATUS_COMPLETED);
-//        if (!updated) {
-//            System.out.println("Failed to update treatment status.");
-//            return false;
-//        }
-//
-//        // show success and cost summary
-//        System.out.println("Treatment " + treatmentId + " marked as COMPLETED");
-//        System.out.println("Medicine dispensed: " + requiredQty + " units of " + medicineName);
-//
-//        // 🔹 Get total price (via PharmacyManager)
-//        double totalPrice = pharmacyManager.calculateTreatmentPrice(treatmentId);
-//        System.out.println("Total Cost for this treatment: RM " + String.format("%.2f", totalPrice));
-//
-//        return true;
-//    }
-
 
     public boolean deleteTreatment(String id) {
         return dao.remove(id);
@@ -419,7 +351,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
         }
     }
 
-    // simple bubble sort on the DAO's list (by yyyy-MM-dd string compare)
+    // simple sort on the DAO list (by yyyy-MM-dd string compare)
     public void sortTreatmentsByDate(boolean newestFirst) {
         if (dao.isEmpty()) {
             System.out.println("No treatments to sort.");
@@ -440,7 +372,6 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
                 }
             }
         }
-
         // display after sorting
         viewAllTreatments();
     }
@@ -486,8 +417,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
             System.out.println("No treatments available.");
             return;
         }
-
-        // We will count via parallel lists (keeps same ADT usage style)
+        // we will count via parallel list
         CircularDoublyLinkedList<String> diagNames = new CircularDoublyLinkedList<>();
         CircularDoublyLinkedList<Integer> diagCounts = new CircularDoublyLinkedList<>();
 
@@ -538,28 +468,28 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
         return dao.findByID(id);
     }
     
-    // get pharmacy manager for accessing medicine information
+    // get pharmacyManager for access medicine info
     public PharmacyManager getPharmacyManager() {
         return pharmacyManager;
     }
     
-    // get consultation manager for accessing consultation information
+    // get consultationManager for access consultation info
     public ConsultationManager getConsultationManager() {
         return consultationManager;
     }
     
-    // helper method to find medicine by ID or name (case-insensitive)
+    // find medicine by ID or name
     private Pharmacy findMedicine(String medicineIdentifier) {
         if (medicineIdentifier == null || medicineIdentifier.trim().isEmpty()) return null;
         String key = medicineIdentifier.trim();
 
         ListInterface<Pharmacy> all = pharmacyManager.getAllMedicines();
-        // Try ID (case-insensitive)
+        // use ID
         for (int i = 1; i <= all.getNumberOfEntries(); i++) {
             Pharmacy m = all.getEntry(i);
             if (m.getMedID().equalsIgnoreCase(key)) return m;
         }
-        // Try Name (case-insensitive)
+        // use Name
         for (int i = 1; i <= all.getNumberOfEntries(); i++) {
             Pharmacy m = all.getEntry(i);
             if (m.getMedName().equalsIgnoreCase(key)) return m;
@@ -589,17 +519,13 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
         if (!found) System.out.println("No treatments found for consultation ID: " + consultationId);
     }
     
-    // get all treatments (for display purposes)
     public CircularDoublyLinkedList<Treatment> getAll() {
         return dao.getAll();
     }
     
-    // get all treatments (for display purposes) - enhanced version
     public ListInterface<Treatment> getAllTreatments() {
         return dao.getAll();
     }
-    
-
     
     public void displayAllTreatments() {
         System.out.println("\n" + "=".repeat(130));
@@ -692,7 +618,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
         System.out.println(" PATIENT TREATMENT HISTORY");
         System.out.println("=".repeat(120));
         
-        // get patient name - work around missing getAllPatients method
+        // get patient name work around missing getAllPatients method
         String patientName = "Unknown";
         // try to get patient name from existing treatments first
         ListInterface<Treatment> treatments = getAllTreatments();
@@ -787,9 +713,8 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
         System.out.println("=".repeat(100));
     }
     
-    /**
-     * Convert date from DD-MM-YYYY format to YYYY-MM-DD format for database comparison
-     */
+
+    // convert date from DD-MM-YYYY format to YYYY-MM-DD format
     private String convertDateToStoredFormat(String inputDate) {
         try {
             // parse DD-MM-YYYY format
@@ -817,7 +742,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
             return;
         }
         
-        // Count diagnosis frequencies using only ADT classes
+        // count diagnosis frequency using only ADT classes
         ListInterface<String> diagNames = new CircularDoublyLinkedList<>();
         ListInterface<Integer> diagCounts = new CircularDoublyLinkedList<>();
         
@@ -874,7 +799,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
             return;
         }
         
-        // group treatments by status using only ADT classes
+        // sort treatments by status
         ListInterface<String> statusTypes = new CircularDoublyLinkedList<>();
         statusTypes.add(STATUS_PENDING);
         statusTypes.add(STATUS_COMPLETED);
@@ -887,7 +812,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
             String status = statusTypes.getEntry(statusIndex);
             ListInterface<Treatment> statusTreatments = new CircularDoublyLinkedList<>();
             
-            // Collect treatments for this status
+            //collect treatments for this status
             for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {
                 Treatment t = treatments.getEntry(i);
                 if (t.getTreatmentStatus().equals(status)) {
@@ -989,7 +914,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
                 boolean shouldSwap = (ascending && cmp > 0) || (!ascending && cmp < 0);
                 
                 if (shouldSwap) {
-                    // swap treatments
+                    // swap treatment
                     sortedTreatments.replace(j, t2);
                     sortedTreatments.replace(j + 1, t1);
                 }
@@ -1114,13 +1039,12 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
         return consultationTreatments;
     }
     
-    // filter treatments by status and display results
-
+    //filter treatments by status and display results
     public void filterTreatmentsByStatus(String status) {
         ListInterface<Treatment> treatments = getAllTreatments();
         ListInterface<Treatment> filteredTreatments = new CircularDoublyLinkedList<>();
         
-        // Normalize the input status to match our constants
+        //normalize the input status to match our constant(ignore case)
         String normalizedStatus = normalizeStatus(status);
         if (normalizedStatus == null) {
             System.out.println("Invalid status provided for filtering");
@@ -1129,7 +1053,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
         
         for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {
             Treatment t = treatments.getEntry(i);
-            if (t.getTreatmentStatus().equals(normalizedStatus)) { // ✅ Use exact match with constants
+            if (t.getTreatmentStatus().equals(normalizedStatus)) { 
                 filteredTreatments.add(t);
             }
         }
@@ -1138,8 +1062,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
     }
     
 
-    // date selection method for reports
-
+    // date selection for reports
     public String selectDateForReport() {
         java.util.Scanner sc = new java.util.Scanner(System.in);
         
@@ -1171,8 +1094,7 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
     }
     
 
-    // helper method to truncate long strings
-
+    // use to truncate long strings
     private String truncateString(String str, int maxLength) {
         if (str == null) return "N/A";
         if (str.length() <= maxLength) return str;
@@ -1186,7 +1108,6 @@ public Treatment addTreatment(Consultation consultation, String diagnosis,
     public void showStockGuidance(String treatmentId) {
         Treatment treatment = getTreatmentById(treatmentId);
         if (treatment == null) {
-            System.out.println("Treatment not found: " + treatmentId);
             return;
         }
         

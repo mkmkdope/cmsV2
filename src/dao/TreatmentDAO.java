@@ -38,28 +38,28 @@ public class TreatmentDAO {
     }
 
 private void initializeData() {
-    // Get existing data from other modules for consistency
+    // get existing data from other modules for consistency
     PatientDAO patientDAO = new PatientDAO();
     ListInterface<Patient> patients = patientDAO.getAllPatients();
     
-    // Get doctors from DoctorManager instead of DoctorInitializer
+    // get doctors from DoctorManager instead of DoctorInitializer
     DoctorManager doctorManager = new DoctorManager();
     Doctor[] doctorsArray = doctorManager.getAllDoctors();
     
-    // Convert array to list
+    // convert array to list
     CircularDoublyLinkedList<Doctor> doctors = new CircularDoublyLinkedList<>();
     for (Doctor doctor : doctorsArray) {
         doctors.add(doctor);
     }
     
-    // Check if we have enough patients and doctors
+    // check if we have enough patients and doctors
     if (patients.getNumberOfEntries() < 2 || doctors.getNumberOfEntries() < 2) {
-        System.out.println("Warning: Not enough sample data for treatments initialization");
+        System.out.println("WARNING: Not enough sample data for treatments initialization");
         return;
     }
     
     try {
-        // Use safe access with bounds checking
+        // use safe access with bounds checking
         Patient p1 = patients.getEntry(1);
         Patient p2 = patients.getEntry(Math.min(2, patients.getNumberOfEntries()));
         Patient p3 = patients.getEntry(Math.min(3, patients.getNumberOfEntries()));
@@ -111,7 +111,7 @@ private void initializeData() {
         treatmentList.add(t6);
         
     } catch (Exception e) {
-        System.out.println("Warning: Could not initialize sample treatment data: " + e.getMessage());
+        System.out.println("WARNING: Could not initialize sample treatment data: " + e.getMessage());
         e.printStackTrace();
     }
 }

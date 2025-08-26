@@ -50,7 +50,7 @@ public class TreatmentMenu {
                     addNewTreatment();
                     break;
                 case 2:
-                    manager.displayAllTreatments(); // Use new beautiful display
+                    manager.displayAllTreatments();
                     break;
                 case 3: 
                     searchMenu();
@@ -65,7 +65,7 @@ public class TreatmentMenu {
                     generateHistory();
                     break;
                 case 7:
-                    manager.displayDiagnosisReport(); // Use new beautiful display
+                    manager.displayDiagnosisReport();
                     break;
                 case 8:
                     sortTreatments();
@@ -91,15 +91,14 @@ public class TreatmentMenu {
         System.out.println("\n=== Select Consultation for Treatment ===");
         
         // get consultations from TreatmentDAO to ensure data consistency
-        // it prevents ID mismatch between treatments and consultations
         ListInterface<Treatment> treatments = manager.getAllTreatments();
         ListInterface<Consultation> consultations = new adt.CircularDoublyLinkedList<>();
         
-        // extract unique consultations from existing treatments
+        // extract specific consultations from existing treatments
         for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {
             Treatment t = treatments.getEntry(i);
             if (t.getConsultation() != null) {
-                // Check if this consultation whether exist
+                // check if the consultation exist
                 boolean exists = false;
                 for (int j = 1; j <= consultations.getNumberOfEntries(); j++) {
                     if (consultations.getEntry(j).getConsultationID().equals(t.getConsultation().getConsultationID())) {
@@ -175,12 +174,12 @@ public class TreatmentMenu {
         // get prescribed medicine with validation
         String prescribed = getValidPrescribedMedicine(allMedicines);
         if (prescribed == null) {
-            return; // User cancelled
+            return;
         }
         
         // get quantity with validation
         int prescribedQty = getValidQuantity();
-        if (prescribedQty == -1) { // Check for cancellation
+        if (prescribedQty == -1) {
             return;
         }
 
@@ -203,11 +202,11 @@ public class TreatmentMenu {
             }
             
             if (consultationId.isEmpty()) {
-                System.out.println("Error: Consultation ID cannot be empty. Please try again.");
+                System.out.println("ERROR: Consultation ID cannot be empty. Please try again.");
                 continue;
             }
             
-            // Check if consultation ID exists
+            // check if consultation ID exists
             boolean exists = false;
             for (int i = 1; i <= consultations.getNumberOfEntries(); i++) {
                 if (consultations.getEntry(i).getConsultationID().equalsIgnoreCase(consultationId)) {
@@ -227,7 +226,7 @@ public class TreatmentMenu {
     
     private String getValidConsultationId() {
         while (true) {
-            System.out.print("Enter Consultation ID (or 'cancel' to go back): ");
+            System.out.print("Enter Consultation ID [or 'cancel' to go back]: ");
             String consultationId = sc.nextLine().trim();
             
             if (consultationId.equalsIgnoreCase("cancel")) {
@@ -235,18 +234,18 @@ public class TreatmentMenu {
             }
             
             if (consultationId.isEmpty()) {
-                System.out.println("Error: Consultation ID cannot be empty. Please try again.");
+                System.out.println("ERROR: Consultation ID cannot be empty. Please try again.");
                 continue;
             }
             
-            // basic format validation for Consultation ID (C followed by numbers) - case insensitive
+            // format validation for Consultation ID (C followed by numbers) - case insensitive
             if (!consultationId.matches("(?i)C\\d+")) {
-                System.out.println("Error: Consultation ID should start with 'C' followed by numbers. Please try again.");
+                System.out.println("ERROR: Consultation ID should start with 'C' followed by numbers. Please try again.");
                 System.out.println("Example: C001, c001, C002, c002");
                 continue;
             }
             
-            // convert to uppercase for consistency
+            // convert word to uppercase for consistency
             consultationId = consultationId.toUpperCase();
             
             return consultationId;
@@ -255,7 +254,7 @@ public class TreatmentMenu {
     
     private String getValidDiagnosis() {
         while (true) {
-            System.out.print("Enter diagnosis (or 'cancel' to go back): ");
+            System.out.print("Enter diagnosis [or 'cancel' to go back]: ");
             String diagnosis = sc.nextLine().trim();
             
             if (diagnosis.equalsIgnoreCase("cancel")) {
@@ -263,7 +262,7 @@ public class TreatmentMenu {
             }
             
             if (diagnosis.isEmpty()) {
-                System.out.println("Error: Diagnosis cannot be empty. Please try again.");
+                System.out.println("ERROR: Diagnosis cannot be empty. Please try again.");
                 continue;
             }
             
@@ -273,7 +272,7 @@ public class TreatmentMenu {
     
     private String getValidPrescribedMedicine(ListInterface<Pharmacy> allMedicines) {
         while (true) {
-            System.out.print("Enter prescribed medicine name or ID (or 'cancel' to go back): ");
+            System.out.print("Enter prescribed medicine name or ID [or 'cancel' to go back]: ");
             String prescribed = sc.nextLine().trim();
             
             if (prescribed.equalsIgnoreCase("cancel")) {
@@ -281,7 +280,7 @@ public class TreatmentMenu {
             }
             
             if (prescribed.isEmpty()) {
-                System.out.println("Error: Medicine name/ID cannot be empty. Please try again.");
+                System.out.println("ERROR: Medicine name/ID cannot be empty. Please try again.");
                 continue;
             }
             
@@ -297,7 +296,7 @@ public class TreatmentMenu {
             }
             
             if (!exists) {
-                System.out.println("Error: Medicine '" + prescribed + "' not found in pharmacy. Please enter a valid medicine name or ID.");
+                System.out.println("ERROR: Medicine '" + prescribed + "' not found in pharmacy. Please enter a valid Medicine Name or ID.");
                 continue;
             }
             
@@ -307,31 +306,31 @@ public class TreatmentMenu {
     
     private int getValidQuantity() {
         while (true) {
-            System.out.print("Enter quantity prescribed (or 'cancel' to go back): ");
+            System.out.print("Enter quantity prescribed [or 'cancel' to go back]: ");
             String input = sc.nextLine().trim();
             
             if (input.equalsIgnoreCase("cancel")) {
-                return -1; // use -1 to indicate cancellation
+                return -1;
             }
             
             if (input.isEmpty()) {
-                System.out.println("Error: Quantity cannot be empty. Please try again.");
+                System.out.println("ERROR: Quantity cannot be empty. Please try again.");
                 continue;
             }
             
             try {
                 int quantity = Integer.parseInt(input);
                 if (quantity <= 0) {
-                    System.out.println("Error: Quantity must be greater than 0. Please try again.");
+                    System.out.println("ERROR: Quantity must be greater than 0. Please try again.");
                     continue;
                 }
                 if (quantity > 1000) {
-                    System.out.println("Error: Quantity seems too high. Please verify and try again.");
+                    System.out.println("ERROR: Quantity seems too high. Please verify and try again.");
                     continue;
                 }
                 return quantity;
             } catch (NumberFormatException e) {
-                System.out.println("Error: Please enter a valid number for quantity.");
+                System.out.println("ERROR: Please enter a valid number for quantity.");
                 continue;
             }
         }
@@ -341,13 +340,13 @@ public class TreatmentMenu {
         // get treatment ID with validation
         String id = getValidTreatmentId();
         if (id == null) {
-            return; // User cancelled
+            return; 
         }
 
-        // show current treatment details first
+        //show the current treatment details first
         manager.displayTreatmentDetails(id);
 
-        // check if treatment can be updated
+        //check if the treatment can update
         if (!manager.canUpdateTreatment(id)) {
             System.out.println("Cannot update this treatment!");
             return;
@@ -385,7 +384,7 @@ public class TreatmentMenu {
             return;
         }
 
-        // ask for new quantity (since qty is part of editing in option 4)
+        // ask for new quantity
         Integer qty = getValidQuantity();
         if (qty == null) {
             return;
@@ -404,7 +403,7 @@ public class TreatmentMenu {
     
     private String getValidTreatmentId() {
         while (true) {
-            System.out.print("Enter Treatment ID (or 'cancel' to go back): ");
+            System.out.print("Enter Treatment ID [or 'cancel' to go back]: ");
             String id = sc.nextLine().trim();
             
             if (id.equalsIgnoreCase("cancel")) {
@@ -412,7 +411,7 @@ public class TreatmentMenu {
             }
             
             if (id.isEmpty()) {
-                System.out.println("Error: Treatment ID cannot be empty. Please try again.");
+                System.out.println("ERROR: Treatment ID cannot be empty. Please try again.");
                 continue;
             }
             
@@ -422,7 +421,7 @@ public class TreatmentMenu {
     
     private String getValidStatus() {
         while (true) {
-            System.out.print("New status (Pending/Completed) (or 'cancel' to go back): ");
+            System.out.print("Enter [Pending/Completed] [or 'cancel' to go back]: ");
             String status = sc.nextLine().trim();
             
             if (status.equalsIgnoreCase("cancel")) {
@@ -430,7 +429,7 @@ public class TreatmentMenu {
             }
             
             if (status.isEmpty()) {
-                System.out.println("Error: Status cannot be empty. Please try again.");
+                System.out.println("ERROR: Status cannot be empty. Please try again.");
                 continue;
             }
             
@@ -439,7 +438,7 @@ public class TreatmentMenu {
                 status.equalsIgnoreCase("Completed")) {
                 return status;
             } else {
-                System.out.println("Error: Status must be one of: Pending or Completed. Please try again.");
+                System.out.println("ERROR: Status must be [Pending or Completed]. Please try again.");
                 continue;
             }
         }
@@ -447,7 +446,7 @@ public class TreatmentMenu {
     
     private String getValidMedicine() {
         while (true) {
-            System.out.print("Enter Medicine ID or Name (or 'cancel' to go back): ");
+            System.out.print("Enter Medicine ID or Name [or 'cancel' to go back]: ");
             String medicine = sc.nextLine().trim();
             
             if (medicine.equalsIgnoreCase("cancel")) {
@@ -455,7 +454,7 @@ public class TreatmentMenu {
             }
             
             if (medicine.isEmpty()) {
-                System.out.println("Error: Medicine cannot be empty. Please try again.");
+                System.out.println("ERROR: Medicine cannot be empty. Please try again.");
                 continue;
             }
             
@@ -473,23 +472,23 @@ public class TreatmentMenu {
             
             if (foundMedicine == null) {
                 System.out.println("Medicine not found in pharmacy!");
-                System.out.println("Please check the medicine ID or name from the list above.");
+                System.out.println("Please check the Medicine ID or Name from the list above.");
                 continue;
             }
             
             System.out.println("Medicine found: " + foundMedicine.getMedName());
-            return foundMedicine.getMedName(); // Return standardized name
+            return foundMedicine.getMedName(); // return medicine name
         }
     }
 
     private void deleteTreatment() {
         String id = getValidTreatmentId();
         if (id == null) {
-            return; // User cancelled
+            return;
         }
         
         // confirm deletion
-        System.out.print("Are you sure you want to delete treatment " + id + "? (yes/no): ");
+        System.out.print("Are you sure you want to delete treatment " + id + "? [yes/no]: ");
         String confirm = sc.nextLine().trim();
         
         if (confirm.equalsIgnoreCase("yes") || confirm.equalsIgnoreCase("y")) {
@@ -522,7 +521,7 @@ public class TreatmentMenu {
                 choice = Integer.parseInt(input);
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input! Please enter a number (1-5).");
-                continue; // retry search menu
+                continue; // ask again the number 1-5
             }
 
             switch (choice) {
@@ -554,7 +553,7 @@ public class TreatmentMenu {
                     break;
                 case 5:
                     System.out.println("Returning to Treatment Menu...");
-                    return; // back to main treatment menu
+                    return; 
                 default:
                     System.out.println("Invalid choice! Please enter 1-5.");
             }
@@ -563,7 +562,7 @@ public class TreatmentMenu {
 
     private String getValidPatientId() {
         while (true) {
-            System.out.print("Enter Patient ID (or 'cancel' to go back): ");
+            System.out.print("Enter Patient ID [or 'cancel' to go back]: ");
             String pid = sc.nextLine().trim();
             
             if (pid.equalsIgnoreCase("cancel")) {
@@ -571,18 +570,18 @@ public class TreatmentMenu {
             }
             
             if (pid.isEmpty()) {
-                System.out.println("Error: Patient ID cannot be empty. Please try again.");
+                System.out.println("ERROR: Patient ID cannot be empty. Please try again.");
                 continue;
             }
             
-            // B=basic format validation for Patient ID (P followed by numbers) - case insensitive
+            // format validation for Patient ID (P followed by numbers)
             if (!pid.matches("(?i)P\\d+")) {
-                System.out.println("Error: Patient ID should start with 'P' followed by numbers. Please try again.");
+                System.out.println("ERROR: Patient ID should start with 'P' followed by numbers. Please try again.");
                 System.out.println("Example: P001, p001, P002, p002");
                 continue;
             }
             
-            // convert to uppercase for consistency
+            // convert word to uppercase for consistency
             pid = pid.toUpperCase();
             
             return pid;
@@ -591,7 +590,7 @@ public class TreatmentMenu {
     
     private String getValidDoctorId() {
         while (true) {
-            System.out.print("Enter Doctor ID (or 'cancel' to go back): ");
+            System.out.print("Enter Doctor ID [or 'cancel' to go back]: ");
             String did = sc.nextLine().trim();
             
             if (did.equalsIgnoreCase("cancel")) {
@@ -599,13 +598,13 @@ public class TreatmentMenu {
             }
             
             if (did.isEmpty()) {
-                System.out.println("Error: Doctor ID cannot be empty. Please try again.");
+                System.out.println("ERROR: Doctor ID cannot be empty. Please try again.");
                 continue;
             }
             
-            // basic format validation for Doctor ID (D followed by numbers) - case insensitive
+            // format validation for Doctor ID (D followed by numbers) - case insensitive
             if (!did.matches("(?i)D\\d+")) {
-                System.out.println("Error: Doctor ID should start with 'D' followed by numbers. Please try again.");
+                System.out.println("ERROR: Doctor ID should start with 'D' followed by numbers. Please try again.");
                 System.out.println("Example: D001, d001, D002, d002");
                 continue;
             }
@@ -629,8 +628,8 @@ public class TreatmentMenu {
             System.out.println("\n" + "=".repeat(60));
             System.out.println(" SORT TREATMENTS MENU");
             System.out.println("=".repeat(60));
-            System.out.println("1. By Date (Newest First)");
-            System.out.println("2. By Date (Oldest First)");
+            System.out.println("1. By Date [Newest First]");
+            System.out.println("2. By Date [Oldest First]");
             System.out.println("3. By Treatment ID");
             System.out.println("4. By Status");
             System.out.println("5. Back to Treatment Menu");
@@ -643,13 +642,13 @@ public class TreatmentMenu {
             try {
                 choice = Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input! Please enter a number (1-5).");
+                System.out.println("Invalid input! Please enter a number [1-5].");
                 continue;
             }
             
             switch (choice) {
                 case 1:
-                    System.out.println("Sorting treatments by date (newest first)...");
+                    System.out.println("Sorting treatments by date [newest first]...");
                     manager.displaySortedTreatmentsByDate(false);
                     break;
                 case 2:
@@ -668,7 +667,7 @@ public class TreatmentMenu {
                     System.out.println("Returning to Treatment Menu...");
                     return;
                 default:
-                    System.out.println("Invalid choice! Please enter 1-5.");
+                    System.out.println("Invalid choice! Please enter [1-5].");
             }
         }
     }
@@ -698,7 +697,7 @@ public class TreatmentMenu {
             System.out.println("-".repeat(40));
         }
         
-        // get consultation ID to view treatments
+        // get consultation ID to view treatment
         String consultationId = getValidConsultationId(consultations);
         if (consultationId == null) {
             return; 
@@ -720,32 +719,41 @@ public class TreatmentMenu {
     }
     
     private void updateStatusOnly() {
-        String id = getValidTreatmentId();
-        if (id == null) {
-            return;
-        }
-        
-        // show current treatment details first
-        manager.displayTreatmentDetails(id);
-        
-        // get new status
-        String status = getValidStatus();
-        if (status == null) {
-            return;
-        }
-        
-        if (manager.updateTreatmentStatusOnly(id, status)) {
-            System.out.println("Status updated successfully!");
-            System.out.println("Updated treatment details:");
+        while (true) {
+            String id = getValidTreatmentId();
+            if (id == null) { // user enter 'cancel'
+                return;
+            }
+
+            Treatment found = manager.getTreatmentById(id);
+            if (found == null) {
+                System.out.println("Treatment not found: " + id);
+                // retry (user can enter another id or 'cancel')
+                continue;
+            }
+
             manager.displayTreatmentDetails(id);
-        } else {
-            System.out.println("Failed to update status.");
+
+            if (!manager.canUpdateTreatment(id)) {
+                return;
+            }
+
+
+            String status = getValidStatus();
+            if (status == null) {
+                return;
+            }
+
+            if (manager.updateTreatmentStatusOnly(id, status)) {
+                System.out.println("Status updated successfully!");
+                System.out.println("Updated treatment details:");
+                manager.displayTreatmentDetails(id);
+            } else {
+                System.out.println("Failed to update status.");
+            }
+            return; 
         }
     }
 
-        public static void main(String[] args) {
-                       TreatmentMenu treatmentMenu = new TreatmentMenu();
-                        treatmentMenu.runTreatmentMenu();
-    }
-    
+
 }
