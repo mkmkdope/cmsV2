@@ -17,21 +17,21 @@ public class DoctorMenu {
     }
 
     private void initializeSampleData() {
-        doctorManager.addDoctor("S001", "Dr. Smith", "Cardiology");
-        doctorManager.addDoctor("S002", "Dr. Johnson", "Pediatrics");
-        doctorManager.addDoctor("S003", "Dr. Williams", "Surgery");
-        doctorManager.addDoctor("S004", "Dr. Brown", "Neurology");
-        doctorManager.addDoctor("S005", "Dr. Davis", "Orthopedics");
-        doctorManager.addDoctor("S006", "Dr. Miller", "Dermatology");
-        doctorManager.addDoctor("S007", "Dr. Wilson", "Ophthalmology");
-        doctorManager.addDoctor("S008", "Dr. Moore", "Surgery");
-        doctorManager.addDoctor("S009", "Dr. Taylor", "Radiology");
-        doctorManager.addDoctor("S010", "Dr. Anderson", "Neurology", "Monday-Thursday 08AM-06PM");
-        doctorManager.addDoctor("S011", "Dr. Thomas", "Neurology", "Tuesday-Friday 08AM-06PM");
-        doctorManager.addDoctor("S012", "Dr. Jackson", "Surgery", "Wednesday-Saturday 08AM-06PM");
-        doctorManager.addDoctor("S013", "Dr. White", "Surgery", "Thursday-Saturday 08AM-07PM");
-        doctorManager.addDoctor("S014", "Dr. Harris", "Nephrology", "Friday-Saturday 08AM-08PM");
-        doctorManager.addDoctor("S015", "Dr. Martin", "Neurology", "Monday-Friday 08AM-05PM");
+        doctorManager.addDoctor("S001", "Dr. Sat", "Dermatology");
+        doctorManager.addDoctor("S002", "Dr. Dua", "Neurosurgery");
+        doctorManager.addDoctor("S003", "Dr. Tig", "Neurosurgery");
+        doctorManager.addDoctor("S004", "Dr. Emp", "Orthopedic Surgery");
+        doctorManager.addDoctor("S005", "Dr. Lim", "Orthopedic Surgery");
+        doctorManager.addDoctor("S006", "Dr. Ena", "Orthopedic Surgery");
+        doctorManager.addDoctor("S007", "Dr. Tuj", "ENT");
+        doctorManager.addDoctor("S008", "Dr. Lap", "ENT");
+        doctorManager.addDoctor("S009", "Dr. Sem", "ENT");
+        doctorManager.addDoctor("S010", "Dr. Sep", "ENT", "Monday-Thursday 08AM-06PM");
+        doctorManager.addDoctor("S011", "Dr. Seb", "General Surgery", "Tuesday-Friday 08AM-06PM");
+        doctorManager.addDoctor("S012", "Dr. Dua", "General Surgery", "Wednesday-Saturday 08AM-06PM");
+        doctorManager.addDoctor("S013", "Dr. Tiga", "General Surgery", "Thursday-Saturday 08AM-07PM");
+        doctorManager.addDoctor("S014", "Dr. Empt", "General Surgery", "Friday-Saturday 08AM-08PM");
+        doctorManager.addDoctor("S015", "Dr. Lima", "General Surgery", "Monday-Friday 08AM-05PM");
     }
 
     public void displayMenu() {
@@ -48,11 +48,14 @@ public class DoctorMenu {
             System.out.println("6. Duty Schedule Report");
             System.out.println("7. Add Doctor Duty");
             System.out.println("8. Remove Doctor Duty");
-            System.out.println("9. Reset Schedule"); //Regenerate
-            System.out.println("10. Workload Analysis Report");
-            System.out.println("11. Specialty Availability Report");
+            System.out.println("9. Reset Schedule");
+            System.out.println("10. Duty Schedule Report [New | Next Cycle]");
+            System.out.println("11. Rotate Doctor List [New | Next Cycle]");
+            System.out.println("12. Swap Doctor Positions [New | Next Cycle]");
+            System.out.println("13. Workload Analysis Report");
+            System.out.println("14. Specialty Availability Report");
             //System.out.println(". Remove Doctor"); //should not delete doctor profile just set as active or inactive
-            //System.out.println(". Display Duty Schedule"); // replace by duty report                   
+            //System.out.println(". Display Duty Schedule"); // not using                   
             System.out.println("0. Back to Main Menu");
             System.out.print("Enter choice: ");
 
@@ -88,9 +91,18 @@ public class DoctorMenu {
                     regenerateSchedule();
                     break;
                 case 10:
-                    workloadReport();
+                    nextCycleReport();
                     break;
                 case 11:
+                    rotateDoctorList();
+                    break;
+                case 12:
+                    swapDoctorPositions();
+                    break;
+                case 13:
+                    workloadReport();
+                    break;
+                case 14:
                     specialtyReport();
                     break;
                 //case : removeDoctor(); break;
@@ -225,6 +237,7 @@ public class DoctorMenu {
 
             String dutySchedule = doctor.getDutySchedule();
 
+            /* no edit keep default */
             // System.out.print("Enter new Schedule (current: " + doctor.getDutySchedule() + "): ");
             // String dutySchedule = scanner.nextLine();
             // if (dutySchedule.trim().isEmpty()) {
@@ -253,7 +266,7 @@ public class DoctorMenu {
         }
     }
 
-    //replace by duty report
+    //not using
     private void displayDutySchedule() {
         System.out.println("\n=== Weekly Duty Schedule ===");
         doctorManager.displayDutySchedule();
@@ -397,6 +410,55 @@ public class DoctorMenu {
         } else {
             System.out.println("Schedule regeneration cancelled.");
         }
+    }
+
+    private void rotateDoctorList() {
+        try {
+            System.out.println("\n=== Rotate Doctor List ===");
+
+            // Show current order
+            Doctor[] doctors = doctorManager.getAllDoctors();
+            System.out.println("Current doctor order:");
+            for (int i = 0; i < doctors.length; i++) {
+                System.out.println((i + 1) + ". " + doctors[i].getName()
+                        + " (" + doctors[i].getDoctorId() + ")");
+            }
+
+            System.out.print("\nEnter number of positions to rotate (+, -): ");
+            int steps = scanner.nextInt();
+            scanner.nextLine();
+
+            doctorManager.rotateDoctors(steps);
+
+        } catch (Exception e) {
+            System.out.println("Error: Please enter a valid number.");
+            scanner.nextLine();
+        }
+    }
+
+    private void swapDoctorPositions() {
+        System.out.println("\n=== Swap Doctor Positions ===");
+
+        // Show current order
+        Doctor[] doctors = doctorManager.getAllDoctors();
+        System.out.println("Current doctor order:");
+        for (int i = 0; i < doctors.length; i++) {
+            System.out.println((i + 1) + ". " + doctors[i].getName()
+                    + " (" + doctors[i].getDoctorId() + ")");
+        }
+
+        System.out.print("\nEnter first Doctor ID: ");
+        String id1 = scanner.nextLine().trim().toUpperCase();
+        System.out.print("Enter second Doctor ID: ");
+        String id2 = scanner.nextLine().trim().toUpperCase();
+
+        doctorManager.swapDoctors(id1, id2);
+    }
+
+    private void nextCycleReport() {
+        System.out.println("\n=== Next Cycle Duty Schedule Report ===");
+        System.out.println("Displaying projection based on current doctor order...");
+        doctorManager.generateNextCycleReport();
     }
 
     //for testing

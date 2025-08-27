@@ -2,7 +2,6 @@ package dao;
 
 import adt.CircularDoublyLinkedList;
 import entity.Doctor;
-//import java.util.Comparator;
 
 public class DoctorDAO {
 
@@ -236,7 +235,7 @@ public void generateDutyReport() {
         return false;
     }
 
-    ////////////////////////////// End of Report //////////////////////////////
+    ////////////////////////////// End of Duty Report //////////////////////////////
 
 
 
@@ -390,9 +389,7 @@ public void generateWorkloadReport() {
         System.out.println("9+ duties:   " + distribution[5] + " doctors");
     }
 
-    ////////////////////////////// End of workload report //////////////////////////////
-
-private int countDuties(Doctor doctor) {
+    private int countDuties(Doctor doctor) {
         int count = 0;
         for (int day = 0; day < DAYS; day++) {
             for (int slot = 0; slot < MAX_SLOTS; slot++) {
@@ -405,45 +402,22 @@ private int countDuties(Doctor doctor) {
         return count;
     }
 
-//    private void mergeSort(DoctorWorkload[] array, Comparator<DoctorWorkload> comparator) {
-//        if (array.length <= 1) {
-//            return;
-//        }
-//
-//        int mid = array.length / 2;
-//        DoctorWorkload[] left = new DoctorWorkload[mid];
-//        DoctorWorkload[] right = new DoctorWorkload[array.length - mid];
-//
-//        for (int i = 0; i < mid; i++) {
-//            left[i] = array[i];
-//        }
-//        for (int i = mid; i < array.length; i++) {
-//            right[i - mid] = array[i];
-//        }
-//
-//        mergeSort(left, comparator);
-//        mergeSort(right, comparator);
-//
-//        merge(array, left, right, comparator);
-//    }
-//    private void merge(DoctorWorkload[] result, DoctorWorkload[] left, DoctorWorkload[] right, Comparator<DoctorWorkload> comparator) {
-//        int i = 0, j = 0, k = 0;
-//
-//        while (i < left.length && j < right.length) {
-//            if (comparator.compare(left[i], right[j]) <= 0) {
-//                result[k++] = left[i++];
-//            } else {
-//                result[k++] = right[j++];
-//            }
-//        }
-//
-//        while (i < left.length) {
-//            result[k++] = left[i++];
-//        }
-//        while (j < right.length) {
-//            result[k++] = right[j++];
-//        }
-//    }
+    // Helper classes
+    class DoctorWorkload {
+
+        Doctor doctor;
+        int dutyCount;
+
+        DoctorWorkload(Doctor doctor, int dutyCount) {
+            this.doctor = doctor;
+            this.dutyCount = dutyCount;
+        }
+    }
+
+    ////////////////////////////// End of workload report //////////////////////////////
+
+
+
     ////////////////////////////// Specialty Report ////////////////////////////// 
 
     public void generateSpecialtyReport() {
@@ -609,17 +583,64 @@ private int countDuties(Doctor doctor) {
 
     ////////////////////////////// End of Specialty Report ////////////////////////////// 
 
+    public CircularDoublyLinkedList<Doctor> getDoctorList() {
+        return doctorList;
+    }
 
-    // Helper classes
-    class DoctorWorkload {
+    public void setDoctorList(CircularDoublyLinkedList<Doctor> doctorList) {
+        this.doctorList = doctorList;
+    }
 
-        Doctor doctor;
-        int dutyCount;
+    public DutySchedule getDutySchedule() {
+        return dutySchedule;
+    }
 
-        DoctorWorkload(Doctor doctor, int dutyCount) {
-            this.doctor = doctor;
-            this.dutyCount = dutyCount;
+    public void rotateDoctors(int steps) {
+        if (doctorList.isEmpty() || doctorList.size() == 1) {
+            return;
         }
+
+        // Normalize steps
+        steps = steps % doctorList.size();
+        if (steps < 0) {
+            steps += doctorList.size();
+        }
+
+        if (steps != 0) {
+            doctorList.rotate(steps);
+            rearrangeDutySchedule(); // Update schedule with new order
+        }
+    }
+
+    public void swapDoctors(String doctorId1, String doctorId2) {
+        if (doctorList.isEmpty()) {
+            return;
+        }
+
+        // Find positions
+        int pos1 = -1, pos2 = -1;
+        for (int i = 1; i <= doctorList.size(); i++) {
+            Doctor doctor = doctorList.getEntry(i);
+            if (doctor.getDoctorId().equals(doctorId1)) {
+                pos1 = i;
+            }
+            if (doctor.getDoctorId().equals(doctorId2)) {
+                pos2 = i;
+            }
+        }
+
+        if (pos1 != -1 && pos2 != -1 && pos1 != pos2) {
+            doctorList.swap(pos1, pos2);
+            rearrangeDutySchedule(); // Update schedule with new order
+        }
+    }
+
+    public Doctor[] getDoctorsInCurrentOrder() {
+        Doctor[] doctors = new Doctor[doctorList.size()];
+        for (int i = 1; i <= doctorList.size(); i++) {
+            doctors[i - 1] = doctorList.getEntry(i);
+        }
+        return doctors;
     }
 
 }
