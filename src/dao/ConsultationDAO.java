@@ -9,7 +9,6 @@ import adt.ListInterface;
 import entity.Consultation;
 import entity.Doctor;
 import entity.Patient;
-import control.PatientManager;
 import java.time.LocalDateTime;
 
 /**
@@ -19,13 +18,13 @@ import java.time.LocalDateTime;
 public class ConsultationDAO {
 
     private ListInterface<Consultation> consultationList = new CircularDoublyLinkedList<>();
-    private ListInterface<Doctor> doctorList = new CircularDoublyLinkedList<>();
-    private ListInterface<Patient> patientList = new CircularDoublyLinkedList<>();
-    private static int counter = 0;
+    private ListInterface<Doctor> doctorList = new CircularDoublyLinkedList<>();;
+    private ListInterface<Patient> patientList;
+    private int counter = 0;
 
     public ConsultationDAO() {
         PatientDAO patientDAO = new PatientDAO();
-        ListInterface<Patient> patientList = patientDAO.getAllPatients();
+        patientList = patientDAO.getAllPatients();
 
         Patient patient1 = patientList.getEntry(1);
         Patient patient2 = patientList.getEntry(2);
@@ -33,26 +32,23 @@ public class ConsultationDAO {
         Patient patient4 = patientList.getEntry(4);
         Patient patient5 = patientList.getEntry(5);
 
-        //temporarily placement for doctor initializer
-        //remove after combine
         Doctor d1 = new Doctor(
-                "S013", "Dr. White", "Surgery", "Tuesday-Saturday 10AM-06PM"
+                "S013", "Dr. White", "General Practitioner (GP)", "Tuesday-Saturday 10AM-06PM"
         );
 
-        // Sample Doctor 2 - Pediatrics
+        // Sample Doctor 2
         Doctor d2 = new Doctor(
-                "S014", "Dr. Harris", "Nephrology", "Monday-Saturday 08AM-04PM"
+                "S014", "Dr. Harris", "General Practitioner (GP)", "Monday-Saturday 08AM-04PM"
         );
 
-        // Sample Doctor 3 - Internal Medicine
+        // Sample Doctor 3
         Doctor d3 = new Doctor(
-                "S015", "Dr. Martin", "Neurology", "Monday-Friday 09AM-09PM"
+                "S015", "Dr. Martin", "Neurology", "Tuesday-Saturday 09AM-09PM"
         );
 
         doctorList.add(d1);
         doctorList.add(d2);
         doctorList.add(d3);
-        //end doctor initialization
 
         Consultation c1 = new Consultation(generateID(), patient1, d1,
                 LocalDateTime.of(2025, 8, 6, 9, 0), "Fever");
@@ -73,26 +69,33 @@ public class ConsultationDAO {
         c3.setPreviousConsultationId(null);
 
         Consultation c4 = new Consultation(generateID(), patient3, d2,
-                LocalDateTime.of(2025, 7, 10, 10, 0), "Cough");
+                LocalDateTime.of(2025, 7, 10, 10, 0), "Cough and Fever");
         c4.setStatus("Completed");
         c4.setFollowUpFlag(false);
         c4.setPreviousConsultationId(null);
 
         Consultation c5 = new Consultation(generateID(), patient4, d3,
-                LocalDateTime.of(2025, 8, 25, 12, 0), "Cough and Fever");
+                LocalDateTime.of(2025, 9, 6, 1, 30), "Headache");
         c5.setStatus("Scheduled");
         c5.setFollowUpFlag(false);
         c5.setPreviousConsultationId(null);
+
+        Consultation c6 = new Consultation(generateID(), patient5, d2,
+                LocalDateTime.of(2025, 9, 6, 1, 0), "Fever");
+        c6.setStatus("Scheduled");
+        c6.setFollowUpFlag(false);
+        c6.setPreviousConsultationId(null);
 
         consultationList.add(c1);
         consultationList.add(c2);
         consultationList.add(c3);
         consultationList.add(c4);
         consultationList.add(c5);
+        consultationList.add(c6);
 
     }
 
-    public static String generateID() {
+    public String generateID() {
         counter++;
         return String.format("C%04d", counter);
     }
@@ -101,7 +104,6 @@ public class ConsultationDAO {
         consultationList.add(consultation);
     }
 
-    //temporarily placement!!!!!!!!
     public ListInterface<Doctor> getAllDoctors() {
         return doctorList;
     }
@@ -115,7 +117,6 @@ public class ConsultationDAO {
         }
         return null;
     }
-    //end temporarily placement!!!!!!!!
 
     public ListInterface<Consultation> getAllConsultation() {
         return consultationList;

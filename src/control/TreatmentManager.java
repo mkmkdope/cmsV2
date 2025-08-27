@@ -10,10 +10,24 @@ import entity.Patient;
 import entity.Doctor;
 import java.time.LocalDateTime;
 import adt.ListInterface;
+import dao.ConsultationDAO;
 
 public class TreatmentManager {
     public static final String STATUS_PENDING = "Pending";
     public static final String STATUS_COMPLETED = "Completed";
+    
+    private TreatmentDAO dao;
+    private ConsultationDAO consultationDAO;
+    private PharmacyManager pharmacyManager;
+    private ConsultationManager consultationManager; 
+    
+    public TreatmentManager(TreatmentDAO treatmentDAO, ConsultationDAO consultationDAO,PharmacyManager pharmacyManager, ConsultationManager consultationManager) {
+        this.dao = treatmentDAO;
+        this.consultationDAO = consultationDAO;
+        this.pharmacyManager = pharmacyManager;
+        this.consultationManager = consultationManager;
+        
+    }
     
     private boolean isValidStatus(String status) {
         if (status == null) return false;
@@ -103,9 +117,9 @@ public class TreatmentManager {
         return true;
     }
 
-    private final TreatmentDAO dao = new TreatmentDAO();
-    private final PharmacyManager pharmacyManager = new PharmacyManager();
-    private final ConsultationManager consultationManager = new ConsultationManager();
+    //private final TreatmentDAO dao = new TreatmentDAO();
+    //private final PharmacyManager pharmacyManager = new PharmacyManager();
+    //private final ConsultationManager consultationManager = new ConsultationManager();
 
     public Treatment addTreatment(Consultation consultation, String diagnosis,
                                   String prescribed, int prescribedQty, String status) {
@@ -1152,5 +1166,9 @@ public class TreatmentManager {
             System.out.println("\nRECOMMENDED ACTION:");
             System.out.println("CAN dispense medicine now");
         }
+    }
+    
+    public ListInterface<Consultation> getAllConsultations() {
+        return consultationDAO.getAllConsultation();
     }
 }

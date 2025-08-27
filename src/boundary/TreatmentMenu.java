@@ -14,7 +14,11 @@ import entity.Pharmacy;
 
 public class TreatmentMenu {
     private Scanner sc = new Scanner(System.in);
-    private TreatmentManager manager = new TreatmentManager();
+    private TreatmentManager manager;
+
+    public TreatmentMenu(TreatmentManager manager) {
+        this.manager = manager;
+    }
 
     public void runTreatmentMenu() {
         while (true) {
@@ -92,7 +96,7 @@ public class TreatmentMenu {
         
         // get consultations from TreatmentDAO to ensure data consistency
         ListInterface<Treatment> treatments = manager.getAllTreatments();
-        ListInterface<Consultation> consultations = new adt.CircularDoublyLinkedList<>();
+        ListInterface<Consultation> consultations = manager.getAllConsultations();
         
         // extract specific consultations from existing treatments
         for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {
