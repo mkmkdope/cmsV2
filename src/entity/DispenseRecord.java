@@ -4,7 +4,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Represents a medicine dispense record in the pharmacy system
+ * @author HEW MIN FEI
+ * Dispense Record Entity
  */
 public class DispenseRecord {
     private String dispenseID;

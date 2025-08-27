@@ -6,7 +6,8 @@ import entity.DispenseRecord;
 import java.time.LocalDateTime;
 
 /**
- * Data Access Object for DispenseRecord operations
+ * @author HEW MIN FEI
+ * DispenseRecordDAO
  */
 public class DispenseRecordDAO {
     
@@ -19,11 +20,11 @@ public class DispenseRecordDAO {
     }
     
     private static void initializeSampleData() {
-        addDispenseRecord("P001", "John Doe", "Paracetamol 500mg", "M1001", 2, 15.50, "Cash", "T0001");
-        addDispenseRecord("P002", "Jane Smith", "Amoxicillin 250mg", "M1002", 1, 25.00, "Credit Card", "T0002");
-        addDispenseRecord("P003", "Mike Johnson", "Ibuprofen 400mg", "M1003", 3, 18.75, "E-Wallet", "T0003");
-        addDispenseRecord("P001", "John Doe", "Cetirizine 10mg", "M1005", 1, 22.50, "Cash", "T0004");
-        addDispenseRecord("P004", "Sarah Wilson", "Omeprazole 20mg", "M1004", 1, 45.00, "Credit Card", "T0005");
+        addDispenseRecord("P001", "Alice Tan", "Paracetamol 500mg", "M1001", 2, 15.50, "Cash", "T0001");
+        addDispenseRecord("P002", "John Lee", "Amoxicillin 250mg", "M1002", 1, 25.00, "Credit Card", "T0002");
+        addDispenseRecord("P003", "Mei Ling", "Ibuprofen 400mg", "M1003", 3, 18.75, "E-Wallet", "T0003");
+        addDispenseRecord("P001", "Alice Tan", "Cetirizine 10mg", "M1005", 1, 22.50, "Cash", "T0004");
+        addDispenseRecord("P004", "Ahmad Zulkifli", "Omeprazole 20mg", "M1004", 1, 45.00, "Credit Card", "T0005");
     }
     
     public static boolean addDispenseRecord(String patientID, String patientName, 

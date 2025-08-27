@@ -1,6 +1,8 @@
 package control;
 
+import adt.CircularDoublyLinkedList;
 import adt.ListInterface;
+import boundary.PharmacyMenu;
 import entity.Pharmacy;
 import entity.DispenseRecord;
 import entity.Treatment;
@@ -8,20 +10,21 @@ import dao.PharmacyDAO;
 import dao.DispenseRecordDAO;
 import dao.TreatmentDAO;
 import java.time.LocalDate;
+import java.util.Comparator;
 
 /**
- *
- * Pharmacy Management Control Class
+ *@author HEW MIN FEI
+ * Pharmacy Control
  */
 public class PharmacyManager {
+    
+    String lineborder ="=".repeat(50);
 
     private final TreatmentDAO treatmentDAO = new TreatmentDAO();
 
     public PharmacyManager() {
-        // Constructor - doesn't need initialize, DAO handle already
     }
 
-    // Existing methods
     public boolean addMedicine(String medName, int medQty, double medPrice, LocalDate expDate) {
         String medID = PharmacyDAO.generateNextMedicineId();
         return PharmacyDAO.addMedicine(medID, medName, medQty, medPrice, expDate);
@@ -47,14 +50,60 @@ public class PharmacyManager {
         return PharmacyDAO.getAllMedicines();
     }
 
-    public ListInterface<Pharmacy> searchMedicinesByName(String medName) {
-        return PharmacyDAO.searchMedicinesByName(medName);
+    public ListInterface<Pharmacy> searchMedicinesByName(String name) {
+        ListInterface<Pharmacy> results = new CircularDoublyLinkedList<>();
+        ListInterface<Pharmacy> allMedicines = PharmacyDAO.getAllMedicines();
+        
+        Pharmacy searchKey = new Pharmacy("", name, 0, 0.0, null);
+        
+        int index = allMedicines.searchByKey(new PharmacyNameComparator(), searchKey);
+        if (index != -1) {
+            results.add(allMedicines.getEntry(index));
+        }
+        
+        for (int i = 1; i <= allMedicines.getNumberOfEntries(); i++) {
+            Pharmacy medicine = allMedicines.getEntry(i);
+            if (medicine != null && medicine.getMedName().toLowerCase().contains(name.toLowerCase())) {
+                results.add(medicine);
+            }
+        }
+        
+        return results;
     }
-
-    public ListInterface<Pharmacy> searchMedicinesById(String medID) {
-        return PharmacyDAO.searchMedicinesById(medID);
+    
+    public ListInterface<Pharmacy> searchMedicinesById(String id) {
+        ListInterface<Pharmacy> results = new CircularDoublyLinkedList<>();
+        ListInterface<Pharmacy> allMedicines = PharmacyDAO.getAllMedicines();
+        
+        Pharmacy searchKey = new Pharmacy(id, "", 0, 0.0, null);
+        
+        int index = allMedicines.searchByKey(new PharmacyIdComparator(), searchKey);
+        if (index != -1) {
+            results.add(allMedicines.getEntry(index));
+        }
+        
+        for (int i = 1; i <= allMedicines.getNumberOfEntries(); i++) {
+            Pharmacy medicine = allMedicines.getEntry(i);
+            if (medicine != null && medicine.getMedID().toLowerCase().contains(id.toLowerCase())) {
+                results.add(medicine);
+            }
+        }
+        
+        return results;
     }
-
+    private static class PharmacyNameComparator implements Comparator<Pharmacy> {
+        @Override
+        public int compare(Pharmacy a, Pharmacy b) {
+            return a.getMedName().compareToIgnoreCase(b.getMedName());
+        }
+    }
+    
+    private static class PharmacyIdComparator implements Comparator<Pharmacy> {
+        @Override
+        public int compare(Pharmacy a, Pharmacy b) {
+            return a.getMedID().compareToIgnoreCase(b.getMedID());
+        }
+    }
     public ListInterface<Pharmacy> getExpiredMedicines() {
         return PharmacyDAO.getExpiredMedicines();
     }
@@ -117,11 +166,38 @@ public class PharmacyManager {
     }
 
     public boolean isMedicineNameExists(String medName) {
-        ListInterface<Pharmacy> medicines = PharmacyDAO.searchMedicinesByName(medName);
+        ListInterface<Pharmacy> medicines =searchMedicinesByName(medName);
         return !medicines.isEmpty();
     }
 
-    // New methods for dispense functionality
+    public ListInterface<Pharmacy> sortMedicines(ListInterface<Pharmacy> medicines, int sortChoice) {
+        adt.CircularDoublyLinkedList<Pharmacy> sortedList = new adt.CircularDoublyLinkedList<>();
+        
+        for (int i = 1; i <= medicines.getNumberOfEntries(); i++) {
+            sortedList.add(medicines.getEntry(i));
+        }
+        
+        switch (sortChoice) {
+            case 1: 
+                sortedList.mergeSort((p1, p2) -> p1.getExpDate().compareTo(p2.getExpDate()));
+                break;
+            case 2: 
+                sortedList.mergeSort((p1, p2) -> p2.getExpDate().compareTo(p1.getExpDate()));
+                break;
+            case 3: 
+                sortedList.mergeSort((p1, p2) -> Integer.compare(p1.getMedQty(), p2.getMedQty()));
+                break;
+            case 4: 
+                sortedList.mergeSort((p1, p2) -> Integer.compare(p2.getMedQty(), p1.getMedQty()));
+                break;
+            case 5: 
+            default:
+                break;
+        }
+        
+        return sortedList;
+    }
+
     public ListInterface<Treatment> getPendingTreatments() {
         ListInterface<Treatment> allTreatments = treatmentDAO.getAll();
         adt.CircularDoublyLinkedList<Treatment> pendingTreatments = new adt.CircularDoublyLinkedList<>();
@@ -159,7 +235,6 @@ public class PharmacyManager {
             return false;
         }
 
-        // Deduct stock via DAO method that supports decreasing quantity
         boolean deducted = PharmacyDAO.deductMedicine(medicine.getMedID(), treatment.getPrescribedQty());
         if (!deducted) {
             System.out.println("Failed to deduct stock.");
@@ -179,7 +254,6 @@ public class PharmacyManager {
             return false;
         }
 
-        // Mark treatment as Completed so it disappears from pending list
         boolean updated = treatmentDAO.updateFields(treatmentID, null, null, null, "Completed");
         if (!updated) {
             System.out.println("Failed to update treatment status.");
@@ -189,7 +263,7 @@ public class PharmacyManager {
     }
 
     private Pharmacy findMedicineByName(String medicineName) {
-        ListInterface<Pharmacy> medicines = PharmacyDAO.searchMedicinesByName(medicineName);
+        ListInterface<Pharmacy> medicines = searchMedicinesByName(medicineName);
         if (!medicines.isEmpty()) {
             return medicines.getEntry(1);
         }
@@ -213,23 +287,33 @@ public class PharmacyManager {
     }
 
     public void printReceipt(DispenseRecord record) {
-        System.out.println("\n" + "=".repeat(50));
+        System.out.println("\n" + lineborder);
         System.out.println("           PHARMACY RECEIPT");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder);
         System.out.println("Receipt ID: " + record.getDispenseID());
         System.out.println("Date: " + record.getDispenseDateTime().format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
-        System.out.println("-".repeat(50));
         System.out.println("Patient: " + record.getPatientName() + " (" + record.getPatientID() + ")");
         System.out.println("Treatment ID: " + record.getTreatmentID());
-        System.out.println("-".repeat(50));
         System.out.println("Medicine: " + record.getMedicineName());
         System.out.println("Quantity: " + record.getQuantity());
         System.out.println("Unit Price: RM " + String.format("%.2f", record.getUnitPrice()));
         System.out.println("-".repeat(50));
         System.out.println("Total Amount: RM " + String.format("%.2f", record.getTotalPrice()));
         System.out.println("Payment Method: " + record.getPaymentMethod());
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder);
         System.out.println("Thank you for your purchase!");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder);
+    }
+
+    public int getTotalStockInQuantity() {
+        return PharmacyDAO.getTotalStockInQuantity();
+    }
+
+    public int getTotalStockOutQuantity() {
+        return PharmacyDAO.getTotalStockOutQuantity();
+    }
+
+    public int getTotalExistingStockQuantity() {
+        return PharmacyDAO.getTotalQuantity();
     }
 }

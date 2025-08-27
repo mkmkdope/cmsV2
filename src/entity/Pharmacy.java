@@ -6,7 +6,7 @@ import java.time.LocalDate;
 /**
  *
  * @author HEW MIN FEI
- * Represents a medicine in the pharmacy management system
+ * Pharmacy Entity
  */
 public class Pharmacy implements Serializable {
 

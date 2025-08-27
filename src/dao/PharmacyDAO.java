@@ -8,12 +8,16 @@ import java.time.LocalDate;
 /**
  *
  * @author HEW MIN FEI
- * Data Access Object for Pharmacy operations
+ * PharmacyDAO
  */
 public class PharmacyDAO {
     
     private static ListInterface<Pharmacy> medicineList;
     private static int nextMedicineId = 1006;
+    
+    // Track stock movements for reporting
+    private static int totalStockIn = 0;
+    private static int totalStockOut = 0;
     
     static {
         medicineList = new CircularDoublyLinkedList<>();
@@ -24,9 +28,11 @@ public class PharmacyDAO {
         //sample medicines
         addMedicine("M1001", "Paracetamol 500mg", 100, 15.50, LocalDate.of(2027, 12, 31));
         addMedicine("M1002", "Amoxicillin 250mg", 50, 25.00, LocalDate.of(2028, 10, 15));
-        addMedicine("M1003", "Ibuprofen 400mg", 75, 18.75, LocalDate.of(2025, 3, 20));
+        addMedicine("M1003", "Ibuprofen 400mg", 75, 18.75, LocalDate.of(2025, 9, 20));
         addMedicine("M1004", "Omeprazole 20mg", 30, 45.00, LocalDate.of(2024, 8, 10));
         addMedicine("M1005", "Cetirizine 10mg", 60, 22.50, LocalDate.of(2025, 1, 15));
+        
+        totalStockIn = 100 + 50 + 75 + 30 + 60;
     }
     
     public static boolean addMedicine(String medID, String medName, int medQty, double medPrice, LocalDate expDate) {
@@ -35,7 +41,11 @@ public class PharmacyDAO {
         }
         
         Pharmacy medicine = new Pharmacy(medID, medName.trim(), medQty, medPrice, expDate);
-        return medicineList.add(medicine);
+        boolean added = medicineList.add(medicine);
+        if (added) {
+            totalStockIn += medQty; 
+        }
+        return added;
     }
     
     public static boolean updateMedicine(String medID, String medName, int medQty, double medPrice, LocalDate expDate) {
@@ -44,8 +54,21 @@ public class PharmacyDAO {
             return false;
         }
         
+        Pharmacy oldMedicine = medicineList.getEntry(position);
+        int oldQty = oldMedicine != null ? oldMedicine.getMedQty() : 0;
+        
         Pharmacy updatedMedicine = new Pharmacy(medID, medName, medQty, medPrice, expDate);
-        return medicineList.replace(position, updatedMedicine);
+        boolean updated = medicineList.replace(position, updatedMedicine);
+        
+        if (updated && oldMedicine != null) {
+            if (medQty > oldQty) {
+                totalStockIn += (medQty - oldQty);
+            } else if (medQty < oldQty) {
+                totalStockOut += (oldQty - medQty);
+            }
+        }
+        
+        return updated;
     }
     
     public static boolean restockMedicine(String medID, int additionalQty) {
@@ -61,12 +84,15 @@ public class PharmacyDAO {
         Pharmacy medicine = medicineList.getEntry(position);
         if (medicine != null) {
             medicine.setMedQty(medicine.getMedQty() + additionalQty);
-            return medicineList.replace(position, medicine);
+            boolean updated = medicineList.replace(position, medicine);
+            if (updated) {
+                totalStockIn += additionalQty; 
+            }
+            return updated;
         }
         return false;
     }
 
-    // New: deduct stock safely for dispensing
     public static boolean deductMedicine(String medID, int deductQty) {
         if (deductQty <= 0) {
             return false;
@@ -83,7 +109,11 @@ public class PharmacyDAO {
             return false;
         }
         medicine.setMedQty(medicine.getMedQty() - deductQty);
-        return medicineList.replace(position, medicine);
+        boolean updated = medicineList.replace(position, medicine);
+        if (updated) {
+            totalStockOut += deductQty; 
+        }
+        return updated;
     }
     
     public static Pharmacy removeMedicine(String medID) {
@@ -91,7 +121,11 @@ public class PharmacyDAO {
         if (position == -1) {
             return null;
         }
-        return medicineList.remove(position);
+        Pharmacy removed = medicineList.remove(position);
+        if (removed != null) {
+            totalStockOut += removed.getMedQty(); 
+        }
+        return removed;
     }
     
     public static Pharmacy getMedicine(String medID) {
@@ -105,30 +139,7 @@ public class PharmacyDAO {
     public static ListInterface<Pharmacy> getAllMedicines() {
         return medicineList;
     }
-    
-    public static ListInterface<Pharmacy> searchMedicinesByName(String medName) {
-        CircularDoublyLinkedList<Pharmacy> result = new CircularDoublyLinkedList<>();
-        for (int i = 1; i <= medicineList.getNumberOfEntries(); i++) {
-            Pharmacy medicine = medicineList.getEntry(i);
-            if (medicine != null && 
-                medicine.getMedName().toLowerCase().contains(medName.toLowerCase())) {
-                result.add(medicine);
-            }
-        }
-        return result;
-    }
-    
-    public static ListInterface<Pharmacy> searchMedicinesById(String medID) {
-        CircularDoublyLinkedList<Pharmacy> result = new CircularDoublyLinkedList<>();
-        for (int i = 1; i <= medicineList.getNumberOfEntries(); i++) {
-            Pharmacy medicine = medicineList.getEntry(i);
-            if (medicine != null && 
-                medicine.getMedID().toLowerCase().contains(medID.toLowerCase())) {
-                result.add(medicine);
-            }
-        }
-        return result;
-    }
+   
     
     public static ListInterface<Pharmacy> getExpiredMedicines() {
         CircularDoublyLinkedList<Pharmacy> result = new CircularDoublyLinkedList<>();
@@ -201,5 +212,17 @@ public class PharmacyDAO {
             }
         }
         return totalQty;
+    }
+
+    public static int getTotalStockInQuantity() {
+        return totalStockIn;
+    }
+
+    public static int getTotalStockOutQuantity() {
+        return totalStockOut;
+    }
+
+    private static int getDispensedQuantityForMedicine(String medID) {
+        return 0; 
     }
 }

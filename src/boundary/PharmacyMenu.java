@@ -14,25 +14,26 @@ import utility.PharmacyReport;
 /**
  *
  * @author HEW MIN FEI
- * Pharmacy Management Boundary Class
+ * Pharmacy Boundary
  */
 public class PharmacyMenu {
 
-    String cancel ="(Type 'cancel' at any time to cancel operation)";
+    String cancel ="(Type 'cancel' / 'c' to cancel operation)";
+    String lineborder ="=".repeat(50);
+    String lineborder2 ="-".repeat(50);
             
     private Scanner scanner = new Scanner(System.in);
     private PharmacyManager pharmacyManager;
 
     public PharmacyMenu() {
         this.pharmacyManager = new PharmacyManager();
-        // Set the pharmacy manager in the report utility
         PharmacyReport.setPharmacyManager(pharmacyManager);
     }
 
     public void displayPharmacyMenu() {
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("         PHARMACY MANAGEMENT");
-        System.out.println("=".repeat(50));
+        System.out.println("\n" + lineborder);
+        System.out.println("PHARMACY MANAGEMENT");
+        System.out.println(lineborder2);
         System.out.println("1 Add New Medicine");
         System.out.println("2 Update Medicine Info");
         System.out.println("3 Restock Medicine");
@@ -42,7 +43,7 @@ public class PharmacyMenu {
         System.out.println("7 Dispense Medicine");
         System.out.println("8 Pharmacy Reports");
         System.out.println("9 Back to Main Menu");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder);
         System.out.print("Enter Choice: ");
     }
 
@@ -96,9 +97,9 @@ public class PharmacyMenu {
     }
 
     private void addNewMedicine() {
-        System.out.println("\n" + "=".repeat(50));
+        System.out.println("\n" + lineborder);
         System.out.println("         ADD NEW MEDICINE");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder2);
         System.out.println(cancel);
 
         System.out.print("Enter Medicine Name: ");
@@ -147,7 +148,7 @@ public class PharmacyMenu {
             expDate = LocalDate.parse(expDateStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             
             if (expDate.isBefore(LocalDate.now())) {
-                System.out.println("Expiry date cannot be in the past!");
+                System.out.println("Expiry date cann't be in the past!");
                 return;
             }
         } catch (DateTimeParseException e) {
@@ -156,21 +157,21 @@ public class PharmacyMenu {
         }
 
         if (pharmacyManager.addMedicine(medName, medQty, medPrice, expDate)) {
-            System.out.println("\n✓ Medicine added successfully!");
+            System.out.println("\nMedicine added successfully!");
             ListInterface<Pharmacy> medicines = pharmacyManager.searchMedicinesByName(medName);
             if (!medicines.isEmpty()) {
                 Pharmacy addedMedicine = medicines.getEntry(1);
                 System.out.println("Medicine ID: " + addedMedicine.getMedID());
             }
         } else {
-            System.out.println("\n✗ Failed to add medicine!");
+            System.out.println("\nFailed to add medicine!");
         }
     }
 
     private void updateMedicineInfo() {
-        System.out.println("\n" + "=".repeat(50));
+        System.out.println("\n" + lineborder);
         System.out.println("         UPDATE MEDICINE INFO");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder2);
         System.out.println(cancel);
 
         System.out.print("Enter Medicine ID to update: ");
@@ -253,9 +254,9 @@ public class PharmacyMenu {
     }
 
     private void restockMedicine() {
-        System.out.println("\n" + "=".repeat(50));
+        System.out.println("\n" + lineborder);
         System.out.println("         RESTOCK MEDICINE");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder2);
         System.out.println(cancel);
 
         System.out.print("Enter Medicine ID: ");
@@ -296,9 +297,9 @@ public class PharmacyMenu {
     }
 
     private void removeMedicine() {
-        System.out.println("\n" + "=".repeat(50));
+        System.out.println("\n" + lineborder);
         System.out.println("         REMOVE MEDICINE");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder2);
         System.out.println(cancel);
 
         System.out.print("Enter Medicine ID to remove: ");
@@ -331,9 +332,9 @@ public class PharmacyMenu {
     }
 
     private void viewAllMedicines() {
-        System.out.println("\n" + "=".repeat(50));
+        System.out.println("\n" + lineborder);
         System.out.println("         ALL MEDICINES");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder2);
 
         ListInterface<Pharmacy> medicines = pharmacyManager.getAllMedicines();
         if (medicines.isEmpty()) {
@@ -343,11 +344,29 @@ public class PharmacyMenu {
             return;
         }
 
-        System.out.println("Total Medicines: " + medicines.getNumberOfEntries());
-        System.out.println("=".repeat(50));
+        System.out.println("Sort Options:");
+        System.out.println("1. By Expiry Date (Oldest First)");
+        System.out.println("2. By Expiry Date (Latest First)");
+        System.out.println("3. By Stock Quantity (Lowest First)");
+        System.out.println("4. By Stock Quantity (Highest First)");
+        System.out.println("5. No Sorting (Default)");
+        System.out.print("Select sorting option (1-5): ");
+
+        int sortChoice;
+        try {
+            sortChoice = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input! Using default sorting.");
+            sortChoice = 5;
+        }
+
+        ListInterface<Pharmacy> sortedMedicines = pharmacyManager.sortMedicines(medicines, sortChoice);
+
+        System.out.println("Total Medicines: " + sortedMedicines.getNumberOfEntries());
+        System.out.println(lineborder);
         
-        for (int i = 1; i <= medicines.getNumberOfEntries(); i++) {
-            Pharmacy medicine = medicines.getEntry(i);
+        for (int i = 1; i <= sortedMedicines.getNumberOfEntries(); i++) {
+            Pharmacy medicine = sortedMedicines.getEntry(i);
             if (medicine != null) {
                 System.out.println("\n" + "-".repeat(40));
                 System.out.println("Medicine " + i + ":");
@@ -355,15 +374,16 @@ public class PharmacyMenu {
             }
         }
         
-        System.out.println("\n" + "=".repeat(50));
+        System.out.println("\n" + lineborder);
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
     }
 
+
     private void searchMedicines() {
-        System.out.println("\n" + "=".repeat(50));
+        System.out.println("\n" + lineborder);
         System.out.println("         SEARCH MEDICINES");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder2);
         System.out.println(cancel);
 
         System.out.println("1. Search by Medicine Name");
@@ -406,7 +426,7 @@ public class PharmacyMenu {
         }
 
         System.out.println("\nSearch Results (" + results.getNumberOfEntries() + " found):");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder);
         for (int i = 1; i <= results.getNumberOfEntries(); i++) {
             Pharmacy medicine = results.getEntry(i);
             if (medicine != null) {
@@ -416,7 +436,7 @@ public class PharmacyMenu {
             }
         }
         
-        System.out.println("\n" + "=".repeat(50));
+        System.out.println("\n" + lineborder);
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
     }
@@ -437,7 +457,7 @@ public class PharmacyMenu {
         }
 
         System.out.println("\nSearch Results (" + results.getNumberOfEntries() + " found):");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder);
         for (int i = 1; i <= results.getNumberOfEntries(); i++) {
             Pharmacy medicine = results.getEntry(i);
             if (medicine != null) {
@@ -447,24 +467,25 @@ public class PharmacyMenu {
             }
         }
         
-        System.out.println("\n" + "=".repeat(50));
+        System.out.println("\n" + lineborder);
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
     }
 
-    // ===== Dispense integration with Treatment module =====
 
+    // Integration with Treatment module //
+    
     private void dispenseMedicineMenu() {
         int choice;
         do {
-            System.out.println("\n" + "=".repeat(50));
+            System.out.println("\n" + lineborder);
             System.out.println("         DISPENSE MEDICINE");
-            System.out.println("=".repeat(50));
+            System.out.println(lineborder2);
             System.out.println("1. View Pending Treatments");
             System.out.println("2. Dispense Medicine");
             System.out.println("3. View Dispense History");
             System.out.println("4. Back to Pharmacy Menu");
-            System.out.println("=".repeat(50));
+            System.out.println(lineborder);
             System.out.print("Enter Choice: ");
 
             try {
@@ -494,9 +515,9 @@ public class PharmacyMenu {
     }
 
     private void viewPendingTreatments() {
-        System.out.println("\n" + "=".repeat(80));
+        System.out.println("\n" + "=".repeat(90));
         System.out.println("                    PENDING TREATMENTS");
-        System.out.println("=".repeat(80));
+        System.out.println("-".repeat(90));
 
         ListInterface<Treatment> pendingTreatments = pharmacyManager.getPendingTreatments();
         if (pendingTreatments.isEmpty()) {
@@ -508,7 +529,7 @@ public class PharmacyMenu {
 
         System.out.printf("%-12s %-20s %-15s %-20s %-8s %-10s\n", 
                          "Treatment ID", "Patient Name", "Patient ID", "Prescribed Medicine", "Quantity", "Status");
-        System.out.println("-".repeat(80));
+        System.out.println("-".repeat(90));
 
         for (int i = 1; i <= pendingTreatments.getNumberOfEntries(); i++) {
             Treatment treatment = pendingTreatments.getEntry(i);
@@ -525,15 +546,15 @@ public class PharmacyMenu {
             }
         }
 
-        System.out.println("=".repeat(80));
+        System.out.println("=".repeat(90));
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
     }
 
     private void dispenseMedicine() {
-        System.out.println("\n" + "=".repeat(50));
+        System.out.println("\n" + lineborder);
         System.out.println("         DISPENSE MEDICINE");
-        System.out.println("=".repeat(50));
+        System.out.println(lineborder2);
 
         ListInterface<Treatment> pendingTreatments = pharmacyManager.getPendingTreatments();
         if (pendingTreatments.isEmpty()) {
@@ -586,6 +607,7 @@ public class PharmacyMenu {
         }
 
         System.out.println("\nPayment Methods:");
+        System.out.println(lineborder2);
         System.out.println("1. Cash");
         System.out.println("2. Credit Card");
         System.out.println("3. E-Wallet");
@@ -620,6 +642,7 @@ public class PharmacyMenu {
         }
 
         System.out.println("\nDispense Summary:");
+        System.out.println(lineborder2);
         System.out.println("Treatment ID: " + selectedTreatment.getTreatmentID());
         System.out.println("Patient: " + selectedTreatment.getConsultation().getPatient().getName());
         System.out.println("Medicine: " + selectedTreatment.getPrescribed());
@@ -634,14 +657,14 @@ public class PharmacyMenu {
         }
 
         if (pharmacyManager.dispenseMedicine(selectedTreatment.getTreatmentID(), paymentMethod)) {
-            System.out.println("\n✓ Medicine dispensed successfully!");
+            System.out.println("\nMedicine dispensed successfully!");
             ListInterface<DispenseRecord> records = pharmacyManager.getAllDispenseRecords();
             if (!records.isEmpty()) {
                 DispenseRecord lastRecord = records.getEntry(records.getNumberOfEntries());
                 pharmacyManager.printReceipt(lastRecord);
             }
         } else {
-            System.out.println("\n✗ Failed to dispense medicine!");
+            System.out.println("\nFailed to dispense medicine!");
         }
 
         System.out.println("\nPress Enter to continue...");
@@ -649,9 +672,9 @@ public class PharmacyMenu {
     }
 
     private void viewDispenseHistory() {
-        System.out.println("\n" + "=".repeat(100));
+        System.out.println("\n" + "=".repeat(120));
         System.out.println("                              DISPENSE HISTORY");
-        System.out.println("=".repeat(100));
+        System.out.println("-".repeat(120));
 
         ListInterface<DispenseRecord> records = pharmacyManager.getAllDispenseRecords();
         if (records.isEmpty()) {
@@ -663,7 +686,7 @@ public class PharmacyMenu {
 
         System.out.printf("%-12s %-20s %-15s %-25s %-8s %-12s %-15s %-20s\n",
                          "Dispense ID", "Patient Name", "Patient ID", "Medicine", "Quantity", "Total Price", "Payment Method", "Date");
-        System.out.println("-".repeat(100));
+        System.out.println("-".repeat(120));
 
         for (int i = 1; i <= records.getNumberOfEntries(); i++) {
             DispenseRecord record = records.getEntry(i);
@@ -681,10 +704,10 @@ public class PharmacyMenu {
             }
         }
 
-        System.out.println("=".repeat(100));
+        System.out.println("-".repeat(120));
         System.out.println("Total Records: " + records.getNumberOfEntries());
         System.out.println("Total Revenue: RM " + String.format("%.2f", pharmacyManager.getTotalRevenue()));
-        System.out.println("=".repeat(100));
+        System.out.println("=".repeat(120));
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
     }
@@ -697,15 +720,15 @@ public class PharmacyMenu {
         return false;
     }
 
-    public void runPharmacyMenu() {
-        int choice;
-        do {
-            displayPharmacyMenu();
-            choice = getPharmacyMenuChoice();
-            if (choice != -1) {
-                processPharmacyMenuChoice(choice);
-            }
+public void runPharmacyMenu() {
+    int choice;
+    do {
+        displayPharmacyMenu();
+        choice = getPharmacyMenuChoice();
+        if (choice != -1) {
+            processPharmacyMenuChoice(choice);
+        }
         } while (choice != 9);
-        System.out.println("Returning to Main Menu...");
-    }
+    System.out.println("Returning to Main Menu...");
+}
 }
