@@ -14,10 +14,6 @@ import dao.TreatmentDAO;
 import dao.waitingQueueDAO;
 import java.util.Scanner;
 
-/**
- *
- * @author USER
- */
 public class MainMenu {
     
     PatientDAO sharedPatientDAO = new PatientDAO();
@@ -36,6 +32,7 @@ public class MainMenu {
 
     public void displayMainMenu() {
         System.out.println(Messages.WELCOME);
+        logo();
         System.out.println(Messages.MAIN_MENU_HEADER);
     }
 
@@ -92,6 +89,7 @@ public class MainMenu {
 
                 } else {
                     System.out.printf(Messages.INVALID_CHOICE, 1, 7);
+                    System.out.println("");
                     choice = 0; // Force loop to continue
                 }
 
@@ -102,12 +100,22 @@ public class MainMenu {
 
             // Add a small pause and clear screen effect before showing menu again
             if (choice != 7) {
-                System.out.println("\n" + Messages.MAIN_MENU_HEADER);
+                logo();
+                System.out.println(Messages.MAIN_MENU_HEADER);
             }
 
         } while (choice != 7);
     }
 
+    public void logo(){
+            System.out.println("");
+            System.out.println("  _____  _    ____  _   _ __  __ _____ ");
+            System.out.println(" |_   _|/ \\  |  _ \\| | | |  \\/  |_   _|");
+            System.out.println("   | | / _ \\ | |_) | | | | |\\/| | | |  ");
+            System.out.println("   | |/ ___ \\|  _ <| |_| | |  | | | |  ");
+            System.out.println("   |_/_/   \\_\\_| \\_\\\\___/|_|  |_| |_|  ");
+    }
+    
     public static void main(String[] args) {
         MainMenu p1 = new MainMenu();
         p1.displayMainMenu();

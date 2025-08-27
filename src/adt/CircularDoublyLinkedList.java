@@ -347,6 +347,7 @@ public class CircularDoublyLinkedList<T> implements ListInterface<T> {
         return size;
     }
 
+    @Override
     public void remove(T item) {
         if (isEmpty()) {
             return;
@@ -374,10 +375,12 @@ public class CircularDoublyLinkedList<T> implements ListInterface<T> {
         }
     }
 
-    //Rotates the list by the specified number of positions. Positive values rotate forward, negative values rotate backward.
+    //Rotates the list by the specified number of positions. 
+    //Positive values rotate forward, negative values rotate backward.
+    @Override
     public void rotate(int steps) {
         if (isEmpty() || size == 1 || steps % size == 0) {
-            return; // No rotation
+            return;
         }
 
         // Normalize steps to be within [0, size-1]
@@ -398,9 +401,10 @@ public class CircularDoublyLinkedList<T> implements ListInterface<T> {
     }
 
     //Swaps two nodes at given positions by adjusting their links
+    @Override
     public void swap(int position1, int position2) {
         if (position1 == position2) {
-            return; // No swap needed
+            return;
         }
 
         if (position1 < 1 || position1 > size || position2 < 1 || position2 > size) {
@@ -425,7 +429,7 @@ public class CircularDoublyLinkedList<T> implements ListInterface<T> {
         }
     }
 
-// Helper method to swap adjacent nodes
+//to swap adjacent nodes
     private void swapAdjacentNodes(Node node1, Node node2) {
         Node beforeNode1 = node1.prev;
         Node afterNode2 = node2.next;
@@ -444,7 +448,7 @@ public class CircularDoublyLinkedList<T> implements ListInterface<T> {
         updateHeadTailAfterSwap(node1, node2);
     }
 
-// Helper method to swap non-adjacent nodes
+//to swap non-adjacent nodes
     private void swapNonAdjacentNodes(Node node1, Node node2) {
         Node beforeNode1 = node1.prev;
         Node afterNode1 = node1.next;
@@ -467,7 +471,7 @@ public class CircularDoublyLinkedList<T> implements ListInterface<T> {
         updateHeadTailAfterSwap(node1, node2);
     }
 
-// Helper method to update head and tail after swap operation
+//to update head and tail after swap operation
     private void updateHeadTailAfterSwap(Node node1, Node node2) {
         if (head == node1) {
             head = node2;

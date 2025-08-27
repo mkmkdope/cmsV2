@@ -3,6 +3,11 @@ package control;
 import dao.DoctorDAO;
 import entity.Doctor;
 
+/**
+ *
+ * @author Yap Ming Kang
+ */
+
 public class DoctorManager {
 
     private DoctorDAO doctorDAO;

@@ -1,5 +1,10 @@
 package entity;
 
+/**
+ *
+ * @author Yap Ming Kang
+ */
+
 public class Doctor {
 
     private String doctorId;

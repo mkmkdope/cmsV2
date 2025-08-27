@@ -3,6 +3,11 @@ package dao;
 import adt.CircularDoublyLinkedList;
 import entity.Doctor;
 
+/**
+ *
+ * @author Yap Ming Kang
+ */
+
 public class DutySchedule {
     private Doctor[][] weeklySchedule;
     private CircularDoublyLinkedList<Doctor> doctorList;

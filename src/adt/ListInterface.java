@@ -33,4 +33,9 @@ public interface ListInterface<T> extends Iterable<T> {
 
     Iterator<T> reverseIterator();
 
+    void rotate(int steps);
+
+    void swap(int position1, int position2);
+
+    void remove(T item);
 }

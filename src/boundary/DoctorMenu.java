@@ -5,6 +5,11 @@ import entity.Doctor;
 import java.util.Scanner;
 import utility.ConfirmationMsg;
 
+/**
+ *
+ * @author Yap Ming Kang
+ */
+
 public class DoctorMenu {
 
     private DoctorManager doctorManager;
@@ -17,21 +22,21 @@ public class DoctorMenu {
     }
 
     private void initializeSampleData() {
-        doctorManager.addDoctor("S001", "Dr. Sat", "Dermatology");
-        doctorManager.addDoctor("S002", "Dr. Dua", "Neurosurgery");
-        doctorManager.addDoctor("S003", "Dr. Tig", "Neurosurgery");
-        doctorManager.addDoctor("S004", "Dr. Emp", "Orthopedic Surgery");
-        doctorManager.addDoctor("S005", "Dr. Lim", "Orthopedic Surgery");
-        doctorManager.addDoctor("S006", "Dr. Ena", "Orthopedic Surgery");
-        doctorManager.addDoctor("S007", "Dr. Tuj", "ENT");
-        doctorManager.addDoctor("S008", "Dr. Lap", "ENT");
-        doctorManager.addDoctor("S009", "Dr. Sem", "ENT");
-        doctorManager.addDoctor("S010", "Dr. Sep", "ENT", "Monday-Thursday 08AM-06PM");
-        doctorManager.addDoctor("S011", "Dr. Seb", "General Surgery", "Tuesday-Friday 08AM-06PM");
-        doctorManager.addDoctor("S012", "Dr. Dua", "General Surgery", "Wednesday-Saturday 08AM-06PM");
-        doctorManager.addDoctor("S013", "Dr. Tiga", "General Surgery", "Thursday-Saturday 08AM-07PM");
-        doctorManager.addDoctor("S014", "Dr. Empt", "General Surgery", "Friday-Saturday 08AM-08PM");
-        doctorManager.addDoctor("S015", "Dr. Lima", "General Surgery", "Monday-Friday 08AM-05PM");
+        doctorManager.addDoctor("S001", "Dr. Yap", "Dermatology");
+        doctorManager.addDoctor("S002", "Dr. Ming", "Neurosurgery");
+        doctorManager.addDoctor("S003", "Dr. Kang", "Neurosurgery");
+        doctorManager.addDoctor("S004", "Dr. Tan", "Orthopedic Surgery");
+        doctorManager.addDoctor("S005", "Dr. Yu", "Orthopedic Surgery");
+        doctorManager.addDoctor("S006", "Dr. Hang", "Orthopedic Surgery");
+        doctorManager.addDoctor("S007", "Dr. Hew", "ENT");
+        doctorManager.addDoctor("S008", "Dr. Min", "ENT");
+        doctorManager.addDoctor("S009", "Dr. Fei", "ENT");
+        doctorManager.addDoctor("S010", "Dr. Angelo", "ENT", "Monday-Thursday 08AM-06PM");
+        doctorManager.addDoctor("S011", "Dr. Wan", "General Surgery", "Tuesday-Friday 08AM-06PM");
+        doctorManager.addDoctor("S012", "Dr. Kai Zhe", "General Surgery", "Wednesday-Saturday 08AM-06PM");
+        doctorManager.addDoctor("S013", "Dr. Ng", "General Surgery", "Thursday-Saturday 08AM-07PM");
+        doctorManager.addDoctor("S014", "Dr. Mei", "General Surgery", "Friday-Saturday 08AM-08PM");
+        doctorManager.addDoctor("S015", "Dr. Yen", "General Surgery", "Monday-Friday 08AM-05PM");
     }
 
     public void displayMenu() {
@@ -57,6 +62,7 @@ public class DoctorMenu {
             //System.out.println(". Remove Doctor"); //should not delete doctor profile just set as active or inactive
             //System.out.println(". Display Duty Schedule"); // not using                   
             System.out.println("0. Back to Main Menu");
+            System.out.println("------------------------------");
             System.out.print("Enter choice: ");
 
             choice = scanner.nextInt();
@@ -134,7 +140,7 @@ public class DoctorMenu {
         boolean validId = false;
         boolean duplicateId = false;
         System.out.println("\nAdding New Profile...");
-        // Validate ID format (e.g., D001)
+
         do {
             System.out.print("Enter Doctor ID (format D001): ");
             id = scanner.nextLine().trim().toUpperCase();
@@ -179,6 +185,7 @@ public class DoctorMenu {
         //System.out.print("Enter Duty Schedule (e.g., Monday-Friday 09AM-05PM): ");
         //String dutySchedule = scanner.nextLine();
         //boolean success = doctorManager.addDoctor(id, name, specialization, dutySchedule);
+        
         boolean success = doctorManager.addDoctor(id, name, specialization);
         if (success) {
             System.out.println("Doctor added successfully.");
@@ -243,6 +250,7 @@ public class DoctorMenu {
             // if (dutySchedule.trim().isEmpty()) {
             //     dutySchedule = doctor.getDutySchedule(); // Keep current if empty
             // }
+            
             if (doctorManager.updateDoctor(id, name, specialization, dutySchedule)) {
                 System.out.println("Doctor updated successfully!");
                 System.out.println("Updated details: " + doctorManager.searchDoctor(id));
