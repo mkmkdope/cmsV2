@@ -22,20 +22,12 @@ public class MainMenu {
     
     PatientDAO sharedPatientDAO = new PatientDAO();
     waitingQueueDAO sharedWaitingQueue = new waitingQueueDAO();
-     ConsultationDAO sharedConsultationDAO = new ConsultationDAO();
+    ConsultationDAO sharedConsultationDAO = new ConsultationDAO();
     ConsultationManager sharedConsultationManager = new ConsultationManager(sharedConsultationDAO, sharedPatientDAO, sharedWaitingQueue);
 
-//    ConsultationDAO sharedConsultationDAO = new ConsultationDAO();
-//    ConsultationManager sharedConsultationManager = new ConsultationManager(sharedConsultationDAO, sharedPatientDAO, sharedWaitingQueue);
-//
-//    private PatientDAO patientDAO = new PatientDAO();
-    private ConsultationDAO consultationDAO = new ConsultationDAO();
-    private TreatmentDAO treatmentDAO = new TreatmentDAO(consultationDAO);
-
-    //private ConsultationManager consultationManager = new ConsultationManager(consultationDAO, sharedPatientDAO);
+    private TreatmentDAO treatmentDAO = new TreatmentDAO(sharedConsultationDAO);
     private PharmacyManager pharmacyManager = new PharmacyManager(treatmentDAO);
-
-    TreatmentManager treatmentManager = new TreatmentManager(treatmentDAO, consultationDAO, pharmacyManager, sharedConsultationManager);
+    private TreatmentManager treatmentManager = new TreatmentManager(treatmentDAO, sharedConsultationDAO, pharmacyManager, sharedConsultationManager);
 
     private Scanner scanner = new Scanner(System.in);
 

@@ -117,10 +117,6 @@ public class TreatmentManager {
         return true;
     }
 
-    //private final TreatmentDAO dao = new TreatmentDAO();
-    //private final PharmacyManager pharmacyManager = new PharmacyManager();
-    //private final ConsultationManager consultationManager = new ConsultationManager();
-
     public Treatment addTreatment(Consultation consultation, String diagnosis,
                                   String prescribed, int prescribedQty, String status) {
         String today = java.time.LocalDate.now().toString();

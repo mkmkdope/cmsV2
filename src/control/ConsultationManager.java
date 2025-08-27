@@ -29,7 +29,6 @@ import java.util.Scanner;
  * @author Ng Mei Yen
  */
 public class ConsultationManager {
-    //control handle logic only
 
     private ListInterface<Patient> patientList;
     private ListInterface<Consultation> consultationList;
@@ -42,19 +41,7 @@ public class ConsultationManager {
     private waitingQueueDAO waitingQueue;
     private Scanner sc = new Scanner(System.in);
 
-//    public ConsultationManager() {
-//        this.consultationDAO = new ConsultationDAO();
-//        this.patientDAO = new PatientDAO();
-//
-//        this.consultationList = consultationDAO.getAllConsultation();
-//        this.patientList = patientDAO.getAllPatients();
-//
-//        this.doctorList = consultationDAO.getAllDoctors();
-//
-//        this.consultationMenu = new ConsultationMenu(this);
-//    }
-    
-    public ConsultationManager(ConsultationDAO consultationDAO, PatientDAO patientDAO,waitingQueueDAO waitingQueue) {
+    public ConsultationManager(ConsultationDAO consultationDAO, PatientDAO patientDAO, waitingQueueDAO waitingQueue) {
         this.consultationDAO = consultationDAO;
         this.patientDAO = patientDAO;
         this.consultationList = consultationDAO.getAllConsultation();
@@ -91,73 +78,70 @@ public class ConsultationManager {
             case 8:
                 completeConsultation(); //- use by doctor, after combine, remove it!
                 break;
-             case 9:{
-         System.out.print("Enter Doctor ID to call next patient: ");
-            String did = sc.nextLine().trim();
-            System.out.print("Enter reason (optional): ");
-            String reason = sc.nextLine();
-            callNextFromWaitingQueue(did, reason);
-            break;
-        }
+            case 9: {
+                System.out.print("Enter Doctor ID to call next patient: ");
+                String did = sc.nextLine().trim();
+                System.out.print("Enter reason (optional): ");
+                String reason = sc.nextLine();
+                callNextFromWaitingQueue(did, reason);
+                break;
+            }
             case 0:
                 System.out.println("\nReturning to Main Menu...");
                 break;
         }
     }
 
-
-     public void setWaitingQueue(waitingQueueDAO wq) {
-    this.waitingQueue = wq;
-}
+    public void setWaitingQueue(waitingQueueDAO wq) {
+        this.waitingQueue = wq;
+    }
 
     //yh 
-    public void callNextFromWaitingQueue(String doctorId, String reason){
-        if(waitingQueue == null){
+    public void callNextFromWaitingQueue(String doctorId, String reason) {
+        if (waitingQueue == null) {
             System.out.println("Waiting queue is not initialized.");
             return;
         }
 
-        if(waitingQueue.isEmpty()){
+        if (waitingQueue.isEmpty()) {
             System.out.println("Waiting list is empty. No patient to call.");
             return;
         }
 
         Patient next = waitingQueue.serveNext();
-        if(next == null){
+        if (next == null) {
             System.out.println("Failed to serve next from waiting queue");
             return;
         }
 
         //find a doctor
         Doctor doc = consultationDAO.findDoctorById(doctorId);
-         if (doc == null) {
-        System.out.println("Doctor not found: " + doctorId);
-    waitingQueue.addByIdWithPriority(next.getPatientId(), 1, patientDAO);
-        return;
+        if (doc == null) {
+            System.out.println("Doctor not found: " + doctorId);
+            waitingQueue.addByIdWithPriority(next.getPatientId(), 1, patientDAO);
+            return;
         }
 
         String cid = consultationDAO.generateID();
         LocalDateTime now = LocalDateTime.now();
 
         Consultation c = new Consultation(cid, next, doc, now, (reason == null || reason.equals("-")) ? "Walk-in" : reason);
-        c.setStatus("Scheduled");       
+        c.setStatus("Scheduled");
         c.setFollowUpFlag(false);
         c.setPreviousConsultationId(null);
 
         consultationDAO.addConsultation(c);
 
-
-         if (consultationMenu != null) {
-        consultationMenu.printSuccessfulSchedule(
-            cid, next.getName(), doc.getName(), now.toString()
-        );
+        if (consultationMenu != null) {
+            consultationMenu.printSuccessfulSchedule(
+                    cid, next.getName(), doc.getName(), now.toString()
+            );
         } else {
-        System.out.println("Scheduled: " + cid + " / " + next.getName() + " -> " + doc.getName() + " @ " + now);
+            System.out.println("Scheduled: " + cid + " / " + next.getName() + " -> " + doc.getName() + " @ " + now);
         }
     }
 
     //////////////////////////////////////////
-
     public void runConsultationMenu() {
         int choice;
         do {

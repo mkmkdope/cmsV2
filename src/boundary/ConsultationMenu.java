@@ -25,10 +25,6 @@ public class ConsultationMenu {
     public ConsultationMenu() {
 
     }
-
-//    public ConsultationMenu(ConsultationManager consultationManager) {
-//        this.consultationManager = consultationManager;
-//    }
     
     public int consultationMenu() {
         int choice = -1;

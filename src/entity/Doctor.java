@@ -12,7 +12,7 @@ public class Doctor {
         this.name = name;
         this.specialization = specialization;
         this.isAvailable = true;
-         this.dutySchedule = "";
+         this.dutySchedule = dutySchedule;
     }
 
     public String getDoctorId() { return doctorId; }
