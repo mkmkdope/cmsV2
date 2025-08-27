@@ -14,10 +14,13 @@ public class TreatmentDAO {
     // Make the treatment list shared across the whole app so changes
     // (like newly added treatments or status updates) are visible everywhere
     private static CircularDoublyLinkedList<Treatment> treatmentList;
+    private ListInterface<Consultation> consultations;
+    private ConsultationDAO consultationDAO;
     private static int idCounter = 1;
     private static boolean initialized = false;
 
-    public TreatmentDAO() {
+    public TreatmentDAO(ConsultationDAO consultationDAO) {
+        this.consultationDAO=consultationDAO;
         if (!initialized) {
             treatmentList = new CircularDoublyLinkedList<>();
             initializeData();
@@ -38,70 +41,36 @@ public class TreatmentDAO {
     }
 
 private void initializeData() {
-    // get existing data from other modules for consistency
-    PatientDAO patientDAO = new PatientDAO();
-    ListInterface<Patient> patients = patientDAO.getAllPatients();
-    
-    // get doctors from DoctorManager instead of DoctorInitializer
-    DoctorManager doctorManager = new DoctorManager();
-    Doctor[] doctorsArray = doctorManager.getAllDoctors();
-    
-    // convert array to list
-    CircularDoublyLinkedList<Doctor> doctors = new CircularDoublyLinkedList<>();
-    for (Doctor doctor : doctorsArray) {
-        doctors.add(doctor);
-    }
-    
-    // check if we have enough patients and doctors
-    if (patients.getNumberOfEntries() < 2 || doctors.getNumberOfEntries() < 2) {
-        System.out.println("WARNING: Not enough sample data for treatments initialization");
+    consultations = consultationDAO.getAllConsultation();
+
+    if (consultations.isEmpty()) {
+        System.out.println("WARNING: No consultations available for treatment initialization");
         return;
     }
     
     try {
-        // use safe access with bounds checking
-        Patient p1 = patients.getEntry(1);
-        Patient p2 = patients.getEntry(Math.min(2, patients.getNumberOfEntries()));
-        Patient p3 = patients.getEntry(Math.min(3, patients.getNumberOfEntries()));
-        Patient p4 = patients.getEntry(Math.min(4, patients.getNumberOfEntries()));
-        
-        Doctor d1 = doctors.getEntry(1);
-        Doctor d2 = doctors.getEntry(Math.min(2, doctors.getNumberOfEntries()));
-        Doctor d3 = doctors.getEntry(Math.min(3, doctors.getNumberOfEntries()));
-
         // create consultations using the existing data
-        Consultation c1 = new Consultation("C0001", p1, d1,
-                java.time.LocalDateTime.of(2025, 1, 10, 9, 30),
-                "Fever and cough");
-        Consultation c2 = new Consultation("C0002", p2, d2,
-                java.time.LocalDateTime.of(2025, 2, 5, 11, 0),
-                "Chest pain");
-        Consultation c3 = new Consultation("C0003", p3, d1,
-                java.time.LocalDateTime.of(2025, 3, 20, 14, 15),
-                "Asthma attack");
-        Consultation c4 = new Consultation("C0004", p4, d3,
-                java.time.LocalDateTime.of(2025, 4, 2, 10, 0),
-                "Breathing difficulty");
-        Consultation c5 = new Consultation("C0005", p1, d2,
-                java.time.LocalDateTime.of(2025, 5, 15, 15, 45),
-                "Irregular heartbeat");
-        Consultation c6 = new Consultation("C0006", p2, d1,
-                java.time.LocalDateTime.of(2025, 6, 25, 13, 30),
-                "Headache and dizziness");
+        Consultation c1 = consultations.getEntry(1);
+        Consultation c2 = consultations.getEntry(2);
+        Consultation c3 = consultations.getEntry(3);
+        Consultation c4 = consultations.getEntry(4);
+        Consultation c5 = consultations.getEntry(5);
+        Consultation c6 = consultations.getEntry(6);
+
 
         // create treatments using the consultations
         Treatment t1 = new Treatment(generateTreatmentID(), c1, "Flu",
-                "Paracetamol 500mg", 20, "2025-01-10", "Completed");
+                "Paracetamol 500mg", 20, "2025-01-10", "Completed");//Fever
         Treatment t2 = new Treatment(generateTreatmentID(), c2, "Hypertension",
-                "Omeprazole 20mg", 40, "2025-02-05", "Pending");
+                "Omeprazole 20mg", 40, "2025-02-05", "Pending");//Fever
         Treatment t3 = new Treatment(generateTreatmentID(), c3, "Asthma",
-                "Cetirizine 10mg", 30, "2025-03-20", "Completed");
+                "Cetirizine 10mg", 30, "2025-03-20", "Completed");//Cough
         Treatment t4 = new Treatment(generateTreatmentID(), c4, "Allergic Rhinitis",
-                "Cetirizine 10mg", 50, "2025-04-02", "Completed");
+                "Cetirizine 10mg", 50, "2025-04-02", "Completed");//Cough and Fever
         Treatment t5 = new Treatment(generateTreatmentID(), c5, "Arrhythmia",
-                "Paracetamol 500mg", 45, "2025-05-15", "Pending");
+                "Paracetamol 500mg", 45, "2025-05-15", "Pending");//Headache
         Treatment t6 = new Treatment(generateTreatmentID(), c6, "Migraine",
-                "Ibuprofen 400mg", 60, "2025-06-25", "Completed");
+                "Ibuprofen 400mg", 60, "2025-06-25", "Completed");//Fever
 
         treatmentList.add(t1);
         treatmentList.add(t2);
@@ -171,4 +140,5 @@ private void initializeData() {
         }
         return false;
     }
+    
 }

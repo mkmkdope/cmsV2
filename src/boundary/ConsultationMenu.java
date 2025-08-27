@@ -4,6 +4,7 @@
  */
 package boundary;
 
+import adt.CircularDoublyLinkedList;
 import adt.ListInterface;
 import control.ConsultationManager;
 import entity.Consultation;
@@ -21,36 +22,34 @@ public class ConsultationMenu {
 
     private ConsultationManager consultationManager;
     Scanner sc = new Scanner(System.in);
-//
-//    //boundary - let user enter input
-//    //control handle logic only
 
     public ConsultationMenu() {
 
     }
 
-    public ConsultationMenu(ConsultationManager consultationManager) {
-        this.consultationManager = consultationManager;
-    }
-
+//    public ConsultationMenu(ConsultationManager consultationManager) {
+//        this.consultationManager = consultationManager;
+//    }
+    
     public int consultationMenu() {
         int choice = -1;
         boolean back;
         do {
+            System.out.println("");
             System.out.println("Consultation Management");
             System.out.println("========================");
             System.out.println("1. Walk-in consultation");
             System.out.println("2. View Today Consultation");
             System.out.println("3. Update Consultation Information");
             System.out.println("4. Search Consultation Record");
-            System.out.println("5. Patient Visitation Report");
-            System.out.println("6. Consultation Summary Report");
-            System.out.println("7. complete consultation(used by doctor) to complete the consultation");
-            System.out.println("8. Call next patient from waiting queue and create consultation");
+            System.out.println("5. Sort and Display Consultation Record");
+            System.out.println("6. Patient Visitation Report");
+            System.out.println("7. Consultation Summary Report");
+            System.out.println("8. Complete consultation");//(used by doctor) to complete the consultation-used by doctor temporaly put here
             System.out.println("0. Exit");
             System.out.println("+------------------------");
 
-            back = false;
+            back = false;//reset
             try {
                 System.out.print("Enter your choice : ");
                 choice = sc.nextInt();
@@ -62,13 +61,20 @@ public class ConsultationMenu {
                 sc.nextLine();
             }
 
-        } while (back || (choice < 0 || choice > 8)); // allow 0..8
+        } while (back || (choice < 0 || choice > 8));
         return choice;
     }
 
     public String inputPatientIC() {
         System.out.print("Enter IC Number of patient: ");
         return sc.nextLine().trim();
+    }
+
+    public String inputReturn() {
+        System.out.println("Patient not found.");
+        System.out.println("Please do the registration first-");
+        System.out.print("Press any key to return: ");
+        return sc.nextLine();
     }
 
     public Boolean isExit() {
@@ -129,7 +135,7 @@ public class ConsultationMenu {
     public String inputConsultationReason() {
         String reason;
         while (true) {
-            System.out.print("Enter reason for consultation (for queue list enter (-) is regardless unknown reason): ");
+            System.out.print("Enter reason for consultation: ");
             reason = sc.nextLine().trim();
             if (reason.isEmpty()) {
                 System.out.println("Reason cannot be empty. Please try again.");
@@ -179,9 +185,8 @@ public class ConsultationMenu {
 
     public int inputSearchOption() {
         int opt = -1;
+        boolean valid = false;
 
-        System.out.println("");
-        System.out.println("=== Search Consultation ===");
         System.out.println("Search consultation based on?");
         System.out.println("1. Patient IC number");
         System.out.println("2. Date/Time");
@@ -193,7 +198,9 @@ public class ConsultationMenu {
         try {
             opt = sc.nextInt();
             sc.nextLine();
-            if (!(opt >= 0 && opt <= 4)) {
+            if (opt >= 0 && opt <= 4) {
+                valid = true;
+            } else {
                 System.out.println("Invalid option. Please enter a number between 0 and 4.");
             }
         } catch (InputMismatchException e) {
@@ -206,6 +213,11 @@ public class ConsultationMenu {
 
     public String inputUpdateConsultationId() {
         System.out.print("Enter Consultation ID to update: ");
+        return sc.nextLine().trim().toUpperCase();
+    }
+
+    public String inputReenterStatus() {
+        System.out.println("Invalid choice. Want to reenter status choice? (yes/no)");
         return sc.nextLine().trim();
     }
 
@@ -278,8 +290,8 @@ public class ConsultationMenu {
 
         return selection;
     }
-    
-    public String inputYesNo(){
+
+    public String inputYesNo() {
         return sc.nextLine();
     }
 
@@ -333,37 +345,104 @@ public class ConsultationMenu {
         } while (true);
     }
 
+    public int inputSortOption() {
+        int opt = -1;
+        boolean valid = false;
+
+        System.out.println("Sort consultation based on? ");
+        System.out.println("1. Date & Time");
+        System.out.println("2. Patient Name");
+        System.out.println("3. Doctor Name");
+        System.out.println("0. Exit");
+        System.out.print("Enter your choice (1-3): ");
+
+        try {
+            opt = sc.nextInt();
+            sc.nextLine();
+            if (opt >= 0 && opt <= 3) {
+                valid = true;
+            } else {
+                System.out.println("Invalid option. Please enter a number between 0 and 3.");
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("Invalid input. Please enter a number between 0 and 3.");
+            sc.nextLine();
+        }
+
+        return opt;
+    }
+
+    public int inputSortOrder() {
+        int opt = -1;
+        boolean valid = false;
+
+        System.out.println("Sort order?");
+        System.out.println("1. Earliest to Latest (ascending)");
+        System.out.println("2. Latest to Earliest (descending)");
+        System.out.print("Enter your choice (1-2): ");
+
+        try {
+            opt = sc.nextInt();
+            sc.nextLine();
+            if (opt >= 1 && opt <= 2) {
+                valid = true;
+            } else {
+                System.out.println("Invalid option. Please enter a number between 0 and 3.");
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("Invalid input. Please enter a number between 0 and 3.");
+            sc.nextLine();
+        }
+
+        return opt;
+    }
+
+    public String inputCIDComplete() {
+        System.out.print("Enter Consultation ID to complete (enter '0' to go back): ");
+        return sc.nextLine();
+    }
+
+    public String inputFUoption() {
+        System.out.print("Is a follow-up required? (yes/no): ");
+        return sc.nextLine().trim().toLowerCase();
+    }
+
+    public String inputFUdate() {
+        System.out.print("Enter follow-up date and time (DD-MM-YYYY HH:MM): ");
+        return sc.nextLine();
+    }
+
     public void consultationStatusReportHeader(String formattedDate) {
         System.out.println("=".repeat(58));
-        System.out.printf("%s %30s %s %13s\n", "=", "Daily Visitation Report", formattedDate, "=");
+        System.out.printf("%-5s %s %s %8s\n", "=", "Consultation Summary Report for", formattedDate, "=");
         System.out.println("=".repeat(58));
         System.out.printf("%-18s %-25s %-10s\n", "Status", "Number of Consultations", "Percentage");
         System.out.println("----------------------------------------------------------");
     }
 
     public void visitationReportHeader(String formattedDate) {
-        System.out.println("=".repeat(108));
-        System.out.printf("%s %52s %s %42s\n", "=", "Daily Visitation Report", formattedDate, "=");
-        System.out.println("=".repeat(108));
-        System.out.printf(" %-5s  %-18s  %-25s  %-16s  %-10s %-10s  %-3s  %-5s \n",
-                "ID", "Patient", "Doctor", "Date/Time", "Reason", "Status", "F/U", "PrevID");
-        System.out.println("-".repeat(108));
+        System.out.println("=".repeat(172));
+        System.out.printf("%s %80s %s %78s\n", "=", "Daily Visitation Report", formattedDate, "=");
+        System.out.println("=".repeat(172));
+        System.out.printf(" %-5s  %-25s  %-35s  %-16s  %-40s %-10s  %-3s  %-25s \n",
+                "ID", "Patient", "Doctor", "Date/Time", "Reason", "Status", "F/U", "Previous Consultation");
+        System.out.println("-".repeat(172));
     }
 
     public void visitationReportFooter(String reportDate, ListInterface<Consultation> searchVisitation) {
-        System.out.println("-".repeat(108));
+        System.out.println("-".repeat(172));
         System.out.printf("Total Visitations for %s: %d\n", reportDate, searchVisitation.getNumberOfEntries());
-        System.out.println("=".repeat(108));
+        System.out.println("=".repeat(172));
     }
 
     public void printRecordHeader() {
         System.out.println("");
-        System.out.println("=".repeat(108));
-        System.out.printf("%s %58s %47s\n", "=", "Consultation Record List", "=");
-        System.out.println("=".repeat(108));
-        System.out.printf(" %-5s  %-18s  %-25s  %-16s  %-10s %-10s  %-3s  %-5s \n",
-                "ID", "Patient", "Doctor", "Date & Time", "Reason", "Status", "F/U", "Prev");
-        System.out.println("=".repeat(108));
+        System.out.println("=".repeat(172));
+        System.out.printf("%-73s %s %73s\n", "=", "Consultation Record List", "=");
+        System.out.println("=".repeat(172));
+        System.out.printf(" %-5s  %-25s  %-35s  %-16s  %-40s %-10s  %-3s  %-25s \n",
+                "ID", "Patient", "Doctor", "Date/Time", "Reason", "Status", "F/U", "Previous Consultation");
+        System.out.println("=".repeat(172));
     }
 
     public void printSuccessfulSchedule(String consultationId, String patientName, String doctorName, String dateTime) {
@@ -373,6 +452,4 @@ public class ConsultationMenu {
         System.out.println("Doctor: " + doctorName);
         System.out.println("Date and Time: " + dateTime);
     }
-    
-    
 }
