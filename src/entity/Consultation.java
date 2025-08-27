@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 /**
  *
- * @author USER
+ * @author Ng Mei Yen
  */
 public class Consultation {
     //private static int counter = 0;

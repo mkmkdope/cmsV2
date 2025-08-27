@@ -14,6 +14,11 @@ import dao.TreatmentDAO;
 import dao.waitingQueueDAO;
 import java.util.Scanner;
 
+/**
+ *
+ * @author all
+ */
+
 public class MainMenu {
     
     PatientDAO sharedPatientDAO = new PatientDAO();

@@ -1,5 +1,10 @@
 package boundary;
 
+/**
+ *
+ * @author yuhang
+ */
+
 public class Messages {
 
     //main menu part
