@@ -4,7 +4,6 @@
  */
 package boundary;
 
-import adt.CircularDoublyLinkedList;
 import adt.ListInterface;
 import control.ConsultationManager;
 import entity.Consultation;
@@ -46,6 +45,7 @@ public class ConsultationMenu {
             System.out.println("6. Patient Visitation Report");
             System.out.println("7. Consultation Summary Report");
             System.out.println("8. Complete consultation");//(used by doctor) to complete the consultation-used by doctor temporaly put here
+            System.out.println("9. Call next patient from waiting queue and create consultation");
             System.out.println("0. Exit");
             System.out.println("+------------------------");
 
@@ -61,7 +61,7 @@ public class ConsultationMenu {
                 sc.nextLine();
             }
 
-        } while (back || (choice < 0 || choice > 8));
+        } while (back || (choice < 0 || choice > 9));
         return choice;
     }
 

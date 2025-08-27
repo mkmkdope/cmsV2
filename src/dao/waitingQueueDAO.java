@@ -127,16 +127,6 @@ public class waitingQueueDAO {
     }
 
 
-    //change
-//    public boolean containsPatient(Patient patient) {
-//     for (int i = 1; i <= queue.getNumberOfEntries(); i++) {
-//         if (queue.getEntry(i).equals(patient)) {
-//             return true;
-//         }
-//     }
-//     return false;
-//     }
-
 
     //inner class
     private static class PatientWithPriority {

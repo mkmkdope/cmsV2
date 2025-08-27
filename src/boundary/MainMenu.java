@@ -4,21 +4,15 @@
  */
 package boundary;
 
-import adt.ListInterface;
 import control.ConsultationManager;
 import control.PatientManager;
-import control.DoctorManager;
 import control.PharmacyManager;
 import control.TreatmentManager;
 import dao.ConsultationDAO;
 import dao.PatientDAO;
-import dao.DoctorDAO;
 import dao.TreatmentDAO;
 import dao.waitingQueueDAO;
-import entity.Patient;
-import entity.Treatment;
 import java.util.Scanner;
-import entity.Doctor;
 
 /**
  *
@@ -28,6 +22,9 @@ public class MainMenu {
     
     PatientDAO sharedPatientDAO = new PatientDAO();
     waitingQueueDAO sharedWaitingQueue = new waitingQueueDAO();
+     ConsultationDAO sharedConsultationDAO = new ConsultationDAO();
+    ConsultationManager sharedConsultationManager = new ConsultationManager(sharedConsultationDAO, sharedPatientDAO, sharedWaitingQueue);
+
 //    ConsultationDAO sharedConsultationDAO = new ConsultationDAO();
 //    ConsultationManager sharedConsultationManager = new ConsultationManager(sharedConsultationDAO, sharedPatientDAO, sharedWaitingQueue);
 //
@@ -35,10 +32,10 @@ public class MainMenu {
     private ConsultationDAO consultationDAO = new ConsultationDAO();
     private TreatmentDAO treatmentDAO = new TreatmentDAO(consultationDAO);
 
-    private ConsultationManager consultationManager = new ConsultationManager(consultationDAO, sharedPatientDAO);
+    //private ConsultationManager consultationManager = new ConsultationManager(consultationDAO, sharedPatientDAO);
     private PharmacyManager pharmacyManager = new PharmacyManager(treatmentDAO);
 
-    TreatmentManager treatmentManager = new TreatmentManager(treatmentDAO, consultationDAO, pharmacyManager, consultationManager);
+    TreatmentManager treatmentManager = new TreatmentManager(treatmentDAO, consultationDAO, pharmacyManager, sharedConsultationManager);
 
     private Scanner scanner = new Scanner(System.in);
 
@@ -52,6 +49,8 @@ public class MainMenu {
 
     public void getUserChoice() {
         int choice;
+
+     
         do {
             System.out.println(Messages.MAIN_MENU_OPTION);
 
@@ -65,8 +64,7 @@ public class MainMenu {
                         case 1:
                             System.out.println("\nRedirecting to Patient Portal...");
                             PatientManager patientManager = new PatientManager(sharedPatientDAO, sharedWaitingQueue);
-                            PatientMenu patientMenu = new PatientMenu(patientManager);
-                            patientMenu.start();
+                            new PatientMenu(patientManager).start();
                             break;
                         case 2:
                             System.out.println("\nRedirecting to Doctor Management...");
@@ -76,7 +74,7 @@ public class MainMenu {
                         case 3:
                             System.out.println("\nRedirecting to Consultation Management...");
                             //ConsultationManager consultationManager = new ConsultationManager(consultationDAO, patientDAO);
-                            consultationManager.runConsultationMenu();
+                            sharedConsultationManager.runConsultationMenu();
                             break;
                         case 4:
                             System.out.println("\nRedirecting to Treatment Management...");

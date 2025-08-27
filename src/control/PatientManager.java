@@ -1,6 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+/**
+ *
+ * @author yuhang
  */
 package control;
 
@@ -12,10 +12,6 @@ import dao.waitingQueueDAO;
 import entity.Patient;
 import java.util.Iterator;
 
-/**
- *
- * @author yuhang
- */
 public class PatientManager {
 
     private PatientDAO dao;
