@@ -11,7 +11,7 @@ import java.util.Comparator;
 
 /**
  *
- * @author USER
+ * @author yuhang
  */
 public class PatientDAO {
 
@@ -41,7 +41,6 @@ public class PatientDAO {
         addPatient(new Patient(generatePatientId(), "890101010101", "Michael Lim", "Male", 36,
                 "015998877665", "Seremban", "michaellim@example.com", "Lactose intolerance"));
         
-        
     }
 
     public String generatePatientId() {
@@ -60,55 +59,6 @@ public class PatientDAO {
         return patientList.add(patient);
     }
 
- 
-    public boolean addPatientWithPriority(Patient patient, int priority){
-        if(findPatientById(patient.getPatientId()) != null) {
-            return false;
-        }
-
-        if(findPatientByIC(patient.getIcNumber()) != null){
-            return false;
-        }
-        
-        // Create a patient with priority wrapper for comparison
-        PatientWithPriority patientWithPriority = new PatientWithPriority(patient, priority);
-        
-        // Use priority comparator (lower number = higher priority)
-        Comparator<PatientWithPriority> priorityComparator = (p1, p2) -> 
-            Integer.compare(p1.priority, p2.priority);
-        
-        // Convert existing patients to have default priority of 5 (lowest)
-        ListInterface<PatientWithPriority> priorityList = new CircularDoublyLinkedList<>();
-        
-        // Add existing patients with default priority
-        for(Patient p : patientList){
-            priorityList.add(new PatientWithPriority(p, 5));
-        };
-        
-        // Add new patient with specified priority
-        priorityList.addWithPriority(priorityComparator, patientWithPriority);
-        
-        // Update main list
-        patientList.clear();
-
-        //using the iterator
-       for(PatientWithPriority pwp : priorityList){
-            patientList.add(pwp.patient);
-        };
-        
-        return true;
-    }
-
-    // Inner class to handle priority
-    private static class PatientWithPriority {
-        Patient patient;
-        int priority;
-        
-        PatientWithPriority(Patient patient, int priority) {
-            this.patient = patient;
-            this.priority = priority;
-        }
-    }
 
     public Patient findPatientById(String id){
         Comparator<Patient> idComparator = (p1, p2) -> p1.getPatientId().compareToIgnoreCase(p2.getPatientId());
@@ -119,7 +69,7 @@ public class PatientDAO {
             return patientList.getEntry(index);
         }
       
-        final Patient[] result = {null};
+         Patient[] result = {null};
         for(Patient patient : patientList ){
             if (patient.getPatientId().equalsIgnoreCase(id) && result[0] == null) {
                 result[0] = patient;
@@ -129,7 +79,7 @@ public class PatientDAO {
     }
 
     public Patient findPatientByIC(String ic) {
-        final Patient[] result = {null};
+         Patient[] result = {null};
        for(Patient patient : patientList){
             if (patient.getIcNumber().equalsIgnoreCase(ic) && result[0] == null) {
                 result[0] = patient;
@@ -141,7 +91,7 @@ public class PatientDAO {
     public boolean updatePatient(Patient updated){
         for(int i = 1; i <= patientList.getNumberOfEntries(); i++){
             if(patientList.getEntry(i).getPatientId().equalsIgnoreCase(updated.getPatientId())){
-                return patientList.replace(i, updated); // Updated to use boolean return
+                return patientList.replace(i, updated); 
             }
         }
         return false;
@@ -161,17 +111,12 @@ public class PatientDAO {
         return patientList;
     }
 
-    
     public boolean containsPatient(Patient patient) {
         return patientList.contains(patient);
     }
 
     public boolean isPatientListEmpty() {
         return patientList.isEmpty();
-    }
-
-    public boolean isPatientListFull() {
-        return patientList.isFull();
     }
 
     public int getPatientCount() {

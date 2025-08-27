@@ -20,10 +20,10 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Comparator;
-import java.util.InputMismatchException;
 import java.util.Locale;
 import java.util.Scanner;
 
+import dao.waitingQueueDAO;
 /**
  *
  * @author USER
@@ -38,6 +38,8 @@ public class ConsultationManager {
 
     private ConsultationDAO consultationDAO;
     private PatientDAO patientDAO;
+
+    private waitingQueueDAO waitingQueue;
     private Scanner sc = new Scanner(System.in);
 
     public ConsultationManager() {
@@ -51,9 +53,12 @@ public class ConsultationManager {
         this.doctorList = consultationDAO.getAllDoctors();
 
         this.consultationMenu = new ConsultationMenu(this);
+
+
+       
     }
 
-    public ConsultationManager(ConsultationDAO consultationDAO, PatientDAO patientDAO) {
+    public ConsultationManager(ConsultationDAO consultationDAO,PatientDAO patientDAO,waitingQueueDAO waitingQueue) {
         this.consultationDAO = consultationDAO;
         this.patientDAO = patientDAO;
 
@@ -62,6 +67,8 @@ public class ConsultationManager {
         this.doctorList = consultationDAO.getAllDoctors(); // get doctors from ConsultationDAO temporarily
 
         this.consultationMenu = new ConsultationMenu();
+
+        this.waitingQueue =  waitingQueue;
     }
 
     public void consultationManagement(int choice) {
@@ -87,11 +94,71 @@ public class ConsultationManager {
             case 7:
                 //completeConsultation();
                 break;
+            case 8:{
+         System.out.print("Enter Doctor ID to call next patient: ");
+            String did = sc.nextLine().trim();
+            System.out.print("Enter reason (optional): ");
+            String reason = sc.nextLine();
+            callNextFromWaitingQueue(did, reason);
+            break;
+        }
+
             case 0:
                 System.out.println("\nReturning to Main Menu...");
                 return;
         }
     }
+
+    public void setWaitingQueue(waitingQueueDAO wq) {
+    this.waitingQueue = wq;
+}
+
+    //yh 
+    public void callNextFromWaitingQueue(String doctorId, String reason){
+        if(waitingQueue == null){
+            System.out.println("Waiting queue is not initialized.");
+            return;
+        }
+
+        if(waitingQueue.isEmpty()){
+            System.out.println("Waiting list is empty. No patient to call.");
+            return;
+        }
+
+        Patient next = waitingQueue.serveNext();
+        if(next == null){
+            System.out.println("Failed to serve next from waiting queue");
+            return;
+        }
+
+        //find a doctor
+        Doctor doc = consultationDAO.findDoctorById(doctorId);
+         if (doc == null) {
+        System.out.println("Doctor not found: " + doctorId);
+    waitingQueue.addByIdWithPriority(next.getPatientId(), 1, patientDAO);
+        return;
+        }
+
+        String cid = ConsultationDAO.generateID();
+        LocalDateTime now = LocalDateTime.now();
+
+        Consultation c = new Consultation(cid, next, doc, now, (reason == null || reason.equals("-")) ? "Walk-in" : reason);
+        c.setStatus("Scheduled");       
+        c.setFollowUpFlag(false);
+        c.setPreviousConsultationId(null);
+
+        consultationDAO.addConsultation(c);
+
+
+         if (consultationMenu != null) {
+        consultationMenu.printSuccessfulSchedule(
+            cid, next.getName(), doc.getName(), now.toString()
+        );
+        } else {
+        System.out.println("Scheduled: " + cid + " / " + next.getName() + " -> " + doc.getName() + " @ " + now);
+        }
+    }
+
 
     public void runConsultationMenu() {
         int choice;

@@ -49,8 +49,8 @@ public static final String ENTER_PATIENT_GENDER = "Enter Gender (Male/Female): "
 public static final String ENTER_PATIENT_AGE = "Enter Age: ";
 public static final String ENTER_PATIENT_PHONE = "Enter Phone Number: ";
 public static final String ENTER_PATIENT_ADDRESS = "Enter Address: ";
-public static final String ENTER_PATIENT_EMAIL = "Enter Email (optional): ";
-public static final String ENTER_PATIENT_HISTORY = "Enter Medical History (optional): ";
+public static final String ENTER_PATIENT_EMAIL = "Enter Email: ";
+public static final String ENTER_PATIENT_HISTORY = "Enter Medical History(optional/enter - is left it blank): ";
 
  public static final String INVALID_IC = "Invalid IC! Please enter a 12-digit number.";
     public static final String DUPLICATE_IC = "This IC is already registered.";

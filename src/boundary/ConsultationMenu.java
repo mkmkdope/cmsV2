@@ -4,7 +4,6 @@
  */
 package boundary;
 
-import adt.CircularDoublyLinkedList;
 import adt.ListInterface;
 import control.ConsultationManager;
 import entity.Consultation;
@@ -47,6 +46,7 @@ public class ConsultationMenu {
             System.out.println("5. Patient Visitation Report");
             System.out.println("6. Consultation Summary Report");
             System.out.println("7. complete consultation(used by doctor) to complete the consultation");
+            System.out.println("8. Call next patient from waiting queue and create consultation");
             System.out.println("0. Exit");
             System.out.println("+------------------------");
 
@@ -62,7 +62,7 @@ public class ConsultationMenu {
                 sc.nextLine();
             }
 
-        } while (back || (choice < 0 || choice > 7)); // allow 0..7
+        } while (back || (choice < 0 || choice > 8)); // allow 0..8
         return choice;
     }
 
@@ -129,7 +129,7 @@ public class ConsultationMenu {
     public String inputConsultationReason() {
         String reason;
         while (true) {
-            System.out.print("Enter reason for consultation: ");
+            System.out.print("Enter reason for consultation (for queue list enter (-) is regardless unknown reason): ");
             reason = sc.nextLine().trim();
             if (reason.isEmpty()) {
                 System.out.println("Reason cannot be empty. Please try again.");

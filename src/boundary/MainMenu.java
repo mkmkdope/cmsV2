@@ -4,16 +4,12 @@
  */
 package boundary;
 
-import adt.ListInterface;
 import control.ConsultationManager;
 import control.PatientManager;
-import control.DoctorManager;
+import dao.ConsultationDAO;
 import dao.PatientDAO;
-import dao.DoctorDAO;
-import entity.Patient;
-import entity.Treatment;
+import dao.waitingQueueDAO;
 import java.util.Scanner;
-import entity.Doctor;
 /**
  *
  * @author USER
@@ -32,6 +28,14 @@ public class MainMenu {
 
 public void getUserChoice() {
     int choice;
+
+     PatientDAO sharedPatientDAO = new PatientDAO();
+    waitingQueueDAO sharedWaitingQueue = new waitingQueueDAO();
+    ConsultationDAO sharedConsultationDAO = new ConsultationDAO();
+    ConsultationManager sharedConsultationManager =
+            new ConsultationManager(sharedConsultationDAO, sharedPatientDAO, sharedWaitingQueue);
+    
+    
     do {
         System.out.println(Messages.MAIN_MENU_OPTION);
         
@@ -44,10 +48,9 @@ public void getUserChoice() {
              switch(choice){
                     case 1:
                         System.out.println("\nRedirecting to Patient Portal...");
-                        PatientDAO patientDAO = new PatientDAO();
-                        PatientManager patientManager = new PatientManager(patientDAO);
-                        PatientMenu patientMenu = new PatientMenu(patientManager);
-                        patientMenu.start();
+
+                       PatientManager patientManager = new PatientManager(sharedPatientDAO, sharedWaitingQueue);
+                        new PatientMenu(patientManager).start();
                         break;
                     case 2:
                         System.out.println("\nRedirecting to Doctor Management...");
@@ -55,9 +58,8 @@ public void getUserChoice() {
                         doctorMenu.displayMenu();
                         break;
                     case 3:
-                        System.out.println("\nRedirecting to Consultation Management...");
-                        ConsultationManager consultationManager = new ConsultationManager();
-                        consultationManager.runConsultationMenu();
+                       ConsultationDAO consultationDAO = new ConsultationDAO();
+                      sharedConsultationManager.runConsultationMenu();
                         break;
                     case 4:
                         System.out.println("\nRedirecting to Treatment Management...");
@@ -84,16 +86,16 @@ public void getUserChoice() {
            }
             else{
                 System.out.printf(Messages.INVALID_CHOICE, 1,7);
-                choice = 0; // Force loop to continue
+                choice = 0; 
             }
 
          
         } catch (NumberFormatException e) {
             System.out.println(Messages.INVALID_INPUT);
-            choice = 0; // Force loop to continue
+            choice = 0; 
         }
         
-        // Add a small pause and clear screen effect before showing menu again
+       
         if (choice != 7) {
             System.out.println("\n" + Messages.MAIN_MENU_HEADER);
         }

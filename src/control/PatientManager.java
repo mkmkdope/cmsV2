@@ -8,21 +8,26 @@ import adt.CircularDoublyLinkedList;
 import adt.ListInterface;
 import boundary.Messages;
 import dao.PatientDAO;
+import dao.waitingQueueDAO;
 import entity.Patient;
-import java.util.Comparator;
 import java.util.Iterator;
 
 /**
  *
- * @author USER
+ * @author yuhang
  */
 public class PatientManager {
 
     private PatientDAO dao;
-    private ListInterface<Patient> waitingQueue = new CircularDoublyLinkedList<>();
+    private waitingQueueDAO waitingQueue;
 
-    public PatientManager(PatientDAO dAO) {
+    public PatientManager(){
+       
+    }
+    
+    public PatientManager(PatientDAO dAO,waitingQueueDAO waitingQueue) {
         this.dao = dAO;
+        this.waitingQueue = waitingQueue;
     }
 
     public boolean registerPatient(String ic, String name, String gender, int age,
@@ -58,42 +63,7 @@ public class PatientManager {
         return success;
     }
 
-    public boolean registerPatientWithPriority(String ic, String name, String gender, int age,
-            String phone, String address, String email, String history, int priority) {
-        if (!ic.matches("\\d{12}")) {
-            System.out.println(Messages.INVALID_IC);
-            return false;
-        }
-        if (dao.findPatientByIC(ic) != null) {
-            System.out.println(Messages.DUPLICATE_IC);
-            return false;
-        }
-        if (age <= 0 || age > 120) {
-            System.out.println(Messages.INVALID_AGE);
-            return false;
-        }
-        if (!phone.matches("\\d{12}")) {
-            System.out.println(Messages.INVALID_PHONE);
-            return false;
-        }
-        if (!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w+$")) {
-            System.out.println(Messages.INVALID_EMAIL);
-            return false;
-        }
-
-        if (priority < 1 || priority > 5) {
-            System.out.println("Invalid priority. Priority must be between 1(highest) and 5 (lowest). ");
-            return false;
-        }
-
-        String newId = dao.generatePatientId();
-        Patient p = new Patient(newId, ic, name, gender, age, phone, address, email, history);
-        boolean success = dao.addPatientWithPriority(p, priority);
-        if (!success) {
-            System.out.println(Messages.DUPLICATE_ID);
-        }
-        return success;
-    }
+   
 
     public void displayAllPatients() {
         ListInterface<Patient> list = dao.getAllPatients();
@@ -173,65 +143,10 @@ public class PatientManager {
         return success;
     }
 
-    public boolean addPatientToQueue(String patientId) {
-        Patient p = dao.findPatientById(patientId);
+   
+   
 
-        if (p == null) {
-            return false;
-        }
-        return waitingQueue.add(p);
-    }
-
-    public boolean addPatientToQueueWithPriority(String patientId, int priority) {
-        Patient p = dao.findPatientById(patientId);
-
-        if (p == null) {
-            return false;
-        }
-        if (priority < 1 || priority > 5) {
-            System.out.println("Invalid priority. Priority must be between 1 (highest) and 5 (lowest).");
-            return false;
-        }
-
-        PatientWithPriority patientWithPriority = new PatientWithPriority(p, priority);
-
-        Comparator<PatientWithPriority> priorityComparator = (p1, p2)
-                -> Integer.compare(p1.priority, p2.priority);
-
-        ListInterface<PatientWithPriority> priorityQueue = new CircularDoublyLinkedList<>();
-
-        for (Patient patient : waitingQueue) {
-            priorityQueue.add(new PatientWithPriority(patient, 5));
-        }
-
-        priorityQueue.addWithPriority(priorityComparator, patientWithPriority);
-
-        waitingQueue.clear();
-        for (PatientWithPriority pwp : priorityQueue) {
-            waitingQueue.add(pwp.patient);
-        }
-
-        return true;
-    }
-
-    private static class PatientWithPriority {
-
-        Patient patient;
-        int priority;
-
-        PatientWithPriority(Patient patient, int priority) {
-            this.patient = patient;
-            this.priority = priority;
-        }
-    }
-
-    public Patient serveNextPatient() {
-        if (waitingQueue.isEmpty()) {
-            return null;
-        }
-
-        return waitingQueue.remove(1); // Remove and return the first patient in the queue (FIFO)
-    }
+   
 
     public void generateReports() {
         ListInterface<Patient> list = dao.getAllPatients();
@@ -277,7 +192,7 @@ public class PatientManager {
     private void printSummaryStatistics(ListInterface<Patient> list) {
         System.out.println("\n=== SUMMARY OF PATIENT STATISTICS ===");
         System.out.println("Total Number of Registered Patients: " + list.getNumberOfEntries());
-        System.out.println("Waiting Queue Size: " + waitingQueue.getNumberOfEntries());
+        System.out.println("Waiting Queue Size: " + waitingQueue.getPatientCount());
         System.out.println("Report Generation Date: " + java.time.LocalDate.now());
         System.out.println("-".repeat(50));
     }
@@ -299,8 +214,8 @@ public class PatientManager {
     private void printDemographicsAnalysis(ListInterface<Patient> list) {
         System.out.println("\n=== DEMOGRAPHICS ANALYSIS ===");
 
-        final int[] genderCount = {0, 0, 0}; // male, female, other
-        final int[] ageGroups = {0, 0, 0, 0, 0}; // under18, 18-30, 31-50, 51-65, over65
+         int[] genderCount = {0, 0, 0}; // male, female, other
+         int[] ageGroups = {0, 0, 0, 0, 0}; // under18, 18-30, 31-50, 51-65, over65
 
         ListInterface<LocationCount> locCounts = new CircularDoublyLinkedList<>();
 
@@ -360,8 +275,8 @@ public class PatientManager {
     private void printGraphicalAnalysis(ListInterface<Patient> list) {
         System.out.println("\n=== GRAPHICAL REPRESENTATION ===");
 
-        final int[] genderCount = {0, 0}; // male, female
-        final int[] ageGroups = {0, 0, 0, 0}; // <18, 18-30, 31-50, 51+
+         int[] genderCount = {0, 0}; // male, female
+         int[] ageGroups = {0, 0, 0, 0}; // <18, 18-30, 31-50, 51+
 
         ListInterface<LocationCount> locCounts = new CircularDoublyLinkedList<>();
 
@@ -387,7 +302,7 @@ public class PatientManager {
             upsertLocationCount(locCounts, safeCity(patient.getAddress()));
         }
 
-        final int maxHeight = 10;
+         int maxHeight = 10;
         int totalGender = genderCount[0] + genderCount[1];
         int totalAge = 0;
         for (int i = 0; i < ageGroups.length; i++) {
@@ -460,8 +375,8 @@ public class PatientManager {
     private void printAdditionalInsights(ListInterface<Patient> list) {
         System.out.println("\n=== ADDITIONAL INSIGHTS ===");
 
-        // Calculate statistics using traversal
-        final int[] stats = {0, Integer.MAX_VALUE, Integer.MIN_VALUE, 0}; // totalAge, minAge, maxAge, patientsWithHistory
+        
+         int[] stats = {0, Integer.MAX_VALUE, Integer.MIN_VALUE, 0}; // totalAge, minAge, maxAge, patientsWithHistory
 
         for (Patient patient : list) {
             int age = patient.getAge();
@@ -485,7 +400,7 @@ public class PatientManager {
         System.out.printf("Average Patient Age: %.1f years\n", avg);
         System.out.printf("Age Range: %d - %d years\n", stats[1] == Integer.MAX_VALUE ? 0 : stats[1], stats[2] == Integer.MIN_VALUE ? 0 : stats[2]);
         System.out.printf("Total Registered Patients: %d\n", list.getNumberOfEntries());
-        System.out.printf("Patients in Waiting Queue: %d\n", waitingQueue.getNumberOfEntries());
+        System.out.printf("Patients in Waiting Queue: %d\n", waitingQueue.getPatientCount());
         System.out.printf("Patients with Medical History: %d (%.1f%%)\n", stats[3], stats[3] * 100.0 / n);
     }
 
@@ -560,21 +475,6 @@ public class PatientManager {
         return repeat(' ', padding) + text;
     }
 
-    private String nowString(String pattern) {
-        return java.time.LocalDateTime.now()
-                .format(java.time.format.DateTimeFormatter.ofPattern(pattern));
-    }
-
-    private int maxOf(int[] arr) {
-        int m = 0;
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] > m) {
-                m = arr[i];
-            }
-        }
-        return m;
-    }
-
     private String safeCity(String address) {
         if (address == null) {
             return "Unknown";
@@ -584,31 +484,8 @@ public class PatientManager {
         return city.isEmpty() ? "Unknown" : city;
     }
 
-    //////////////////////////////////////////////////////////////////////
 
-    public void displayWaitingQueue() {
-        System.out.println("\n=== CURRENT WAITING QUEUE ===");
-        if (waitingQueue.isEmpty()) {
-            System.out.println("No patients in waiting queue.");
-            return;
-        }
-
-        System.out.printf("%-10s | %-15s | %-20s | %-8s | %-5s\n",
-                "Queue #", "Patient ID", "Name", "Gender", "Age");
-        System.out.println("-".repeat(65));
-
-        final int[] counter = {1}; 
-
-        for (Patient patient : waitingQueue) {
-            System.out.printf("%-10d | %-15s | %-20s | %-8s | %-5d\n",
-                    counter[0], patient.getPatientId(), patient.getName(),
-                    patient.getGender(), patient.getAge());
-            counter[0]++;
-        }
-
-        System.out.println("-".repeat(65));
-        System.out.println("Total patients in queue: " + waitingQueue.getNumberOfEntries());
-    }
+    
 
     // Use sorting methods using mergeSort from ADT
     public void sortPatientsByName() {
@@ -630,29 +507,6 @@ public class PatientManager {
         System.out.println("Patients sorted by ID.");
     }
 
-    
-    public boolean isPatientInQueue(String patientId) {
-        Patient patient = dao.findPatientById(patientId);
-        if (patient == null) {
-            return false;
-        }
-        return waitingQueue.contains(patient);
-    }
-
-    public boolean removePatientFromQueue(String patientId) {
-        Patient patient = dao.findPatientById(patientId);
-        if (patient == null) {
-            return false;
-        }
-
-        for (int i = 1; i <= waitingQueue.getNumberOfEntries(); i++) {
-            if (waitingQueue.getEntry(i).getPatientId().equalsIgnoreCase(patientId)) {
-                waitingQueue.remove(i);
-                return true;
-            }
-        }
-        return false;
-    }
 
     public void displayPatientsReverse() {
         ListInterface<Patient> list = dao.getAllPatients();
@@ -670,32 +524,14 @@ public class PatientManager {
         Iterator<Patient> reverseItr = list.reverseIterator();
         while (reverseItr.hasNext()) {
             Patient patient = reverseItr.next();
-            System.out.printf(Messages.PATIENT_TABLE_FORMAT,
-                    patient.getPatientId(), patient.getIcNumber(), patient.getName(),
-                    patient.getGender(), patient.getAge(), patient.getPhoneNumber(),
-                    patient.getAddress(), patient.getEmail(), patient.getMedicalHistory());
+            System.out.printf(Messages.PATIENT_TABLE_FORMAT,patient.getPatientId(), patient.getIcNumber(), patient.getName(),patient.getGender(), patient.getAge(), patient.getPhoneNumber(), patient.getAddress(), patient.getEmail(), patient.getMedicalHistory());
         }
 
         System.out.println(Messages.PATIENT_TABLE_LINE);
     }
 
-    public boolean replacePatientInQueue(int position, String newPatientId) {
-        Patient newPatient = dao.findPatientById(newPatientId);
-        if (newPatient == null) {
-            return false;
-        }
-
-        return waitingQueue.replace(position, newPatient);
-    }
-
-    public void clearQueue() {
-        waitingQueue.clear();
-        System.out.println("Waiting queue cleared successfully.");
-    }
-
-
-    public boolean containsPatient(Patient patient) {
-        return dao.containsPatient(patient);
+    public int containsId(String id){
+        return waitingQueue.containsId(id);
     }
 
     public Patient getPatientAtPosition(int position) {
@@ -713,7 +549,7 @@ public class PatientManager {
         return dao.insertPatientAtPosition(position, patient);
     }
     
-       public int getPatientCount() {
+    public int getPatientCount() {
         return dao.getPatientCount();
     }
 
@@ -722,18 +558,7 @@ public class PatientManager {
         return dao.searchPatientByAge(age);
     }
 
-    public int getQueueSize() {
-        return waitingQueue.getNumberOfEntries();
-    }
-
-    public Patient getPatientAtQueuePosition(int position) {
-        if (position < 1 || position > waitingQueue.getNumberOfEntries()) {
-            return null;
-        }
-        return waitingQueue.getEntry(position);
-    }
-
- 
+   
     public void updateAllPatientsInLocation(String location, String newLocation) {
         for (Patient patient : dao.getAllPatients()) {
             if (patient.getAddress().toLowerCase().contains(location.toLowerCase())) {
@@ -754,22 +579,11 @@ public class PatientManager {
         System.out.println("Updated all patients from " + location + " to " + newLocation);
     }
 
-   
-
-    public void displayQueueStatistics() {
-        System.out.println("\n=== QUEUE STATISTICS ===");
-        System.out.println("Queue Size: " + waitingQueue.getNumberOfEntries());
-
-        if (!waitingQueue.isEmpty()) {
-            System.out.println("Next Patient to Serve: " + waitingQueue.getEntry(1).getName());
-            System.out.println("Last Patient in Queue: " + waitingQueue.getEntry(waitingQueue.getNumberOfEntries()).getName());
-        }
-    }
 
     public void displayPatientsByAgeRange(int minAge, int maxAge) {
         System.out.println("\n=== PATIENTS IN AGE RANGE: " + minAge + " - " + maxAge + " ===");
 
-        final boolean[] found = {false};
+         boolean[] found = {false};
         for (Patient patient : dao.getAllPatients()) {
             if (patient.getAge() >= minAge && patient.getAge() <= maxAge) {
                 if (!found[0]) {
@@ -795,7 +609,7 @@ public class PatientManager {
     public void displayPatientsByGender(String gender) {
         System.out.println("\n=== PATIENTS BY GENDER: " + gender.toUpperCase() + " ===");
 
-        final boolean[] found = {false};
+         boolean[] found = {false};
 
         for (Patient patient : dao.getAllPatients()) {
             if (patient.getGender().equalsIgnoreCase(gender)) {
@@ -818,5 +632,115 @@ public class PatientManager {
             System.out.println(Messages.PATIENT_TABLE_LINE);
         }
     }
+
+
+
+    //////////////Queue////////////////////////
+    
+    public Patient peekNextPatient() {
+    if (waitingQueue == null || waitingQueue.isEmpty()) return null;
+    return waitingQueue.getEntry(1); 
+    }
+
+     public boolean addPatientToQueue(String patientId) {
+        Patient p = dao.findPatientById(patientId);
+
+        if (p == null) {
+            return false;
+        }
+        return waitingQueue.add(p);
+    }
+
+    public boolean addPatientToQueueWithPriority(String patientId, int priority) {
+    return waitingQueue.addByIdWithPriority(patientId, priority, dao);
+    }
+
+
+    public void displayWaitingQueue() {
+        System.out.println("\n=== CURRENT WAITING QUEUE ===");
+        if (waitingQueue.isEmpty()) {
+            System.out.println("No patients in waiting queue.");
+            return;
+        }
+
+        System.out.printf("%-10s | %-15s | %-20s | %-8s | %-5s\n",
+                "Queue #", "Patient ID", "Name", "Gender", "Age");
+        System.out.println("-".repeat(65));
+
+         int[] counter = {1}; 
+
+        for (int i = 1; i <= waitingQueue.getPatientCount(); i++) {
+             Patient patient = waitingQueue.getEntry(i);
+            System.out.printf("%-10d | %-15s | %-20s | %-8s | %-5d\n",
+                    counter[0], patient.getPatientId(), patient.getName(),
+                    patient.getGender(), patient.getAge());
+            counter[0]++;
+        }
+
+        System.out.println("-".repeat(65));
+        System.out.println("Total patients in queue: " + waitingQueue.getPatientCount());
+    }
+
+    public int getQueueSize() {
+        return waitingQueue.getPatientCount();
+    }
+
+    public Patient getPatientAtQueuePosition(int position) {
+        if (position < 1 || position > waitingQueue.getPatientCount()) {
+            return null;
+        }
+        return waitingQueue.getEntry(position);
+    }
+
+      public int isPatientInQueue(String patientId) {
+        Patient patient = dao.findPatientById(patientId);
+        if (patient == null) {
+            return -1;
+        }
+        return waitingQueue.containsId(patientId);
+    }
+
+    public boolean removePatientFromQueue(String patientId) {
+        Patient patient = dao.findPatientById(patientId);
+        if (patient == null) {
+            System.out.println("Patient ID not found.");
+            return false;
+        }
+
+        boolean removed = waitingQueue.removeById(patientId);
+        if(!removed){
+            System.out.println("Patient exists but is not in the queue");
+        }
+        return removed;
+    }
+
+    public boolean replacePatientInQueue(int position, String newPatientId) {
+        Patient newPatient = dao.findPatientById(newPatientId);
+        if (newPatient == null) {
+            return false;
+        }
+
+        return waitingQueue.replaceAtPosition(position, newPatient);
+    }
+
+    public void clearQueue() {
+        waitingQueue.clear();
+        System.out.println("Waiting queue cleared successfully.");
+    }
+
+
+    public void displayQueueStatistics() {
+        System.out.println("\n=== QUEUE STATISTICS ===");
+        System.out.println("Queue Size: " + waitingQueue.getPatientCount());
+
+        if (!waitingQueue.isEmpty()) {
+            System.out.println("Next Patient to Serve: " + waitingQueue.getEntry(1).getName());
+            System.out.println("Last Patient in Queue: " + waitingQueue.getEntry(waitingQueue.getPatientCount()).getName());
+        }
+    }
+
+    public waitingQueueDAO getWaitingQueueDAO() {
+    return waitingQueue;
+}
 
 }

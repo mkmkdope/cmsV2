@@ -17,6 +17,10 @@ public class PatientMenu {
     private PatientManager manager;
     private Scanner sc = new Scanner(System.in);
     
+    public PatientMenu(){
+
+    }
+    
     public PatientMenu(PatientManager manager){
        this.manager = manager;
     }
@@ -322,8 +326,8 @@ private void manageQueue(){
         System.out.println(" PATIENT QUEUE MANAGEMENT");
         System.out.println(Messages.FORMAT);
         System.out.println("1. Add patient to queue (normal priority)");
-        System.out.println("2. Add patient to queue (with priority)");
-        System.out.println("3. Serve next patient");
+        System.out.println("2. Add patient to queue (with priority (1-highest --- 5-lowest))");
+        System.out.println("3. Peek next patient (use for Consultation Menu to serve)");
         System.out.println("4. View queue");
         System.out.println("5. Remove patient from queue");
         System.out.println("6. Check if patient is in queue");
@@ -371,14 +375,15 @@ private void manageQueue(){
                 }
                 break;
 
-            case 3:
-                Patient next = manager.serveNextPatient();
-                if(next!=null){
-                    System.out.println("Serving: " + next);
-                }else{
-                    System.out.println("Queue is empty.");
-                }
+            case 3:{
+                 Patient head = manager.peekNextPatient();
+             if (head != null) {
+             System.out.println("Next in queue (not removed): " + head);
+             } else {
+             System.out.println("Queue is empty.");
+                 }
                 break;
+                }
 
             case 4:
                 manager.displayWaitingQueue();
@@ -397,7 +402,7 @@ private void manageQueue(){
             case 6:
                 System.out.print("Enter Patient ID to check: ");
                 String checkId = sc.nextLine();
-                if(manager.isPatientInQueue(checkId)){
+                if(manager.isPatientInQueue(checkId) > 0){
                     System.out.println("Patient is in the queue.");
                 }else{
                     System.out.println("Patient is not in the queue.");
@@ -442,11 +447,12 @@ private void manageQueue(){
                 break;
             case 12:
                 System.out.println("Returning to Patient Menu...");
+                start();
                 break;
             default:
-                System.out.printf(Messages.INVALID_CHOICE, 1, 9);
+                System.out.printf(Messages.INVALID_CHOICE, 1, 12);
         }
- }while(choice != 9);
+ }while(choice != 12);
 
 }
 
@@ -518,19 +524,19 @@ private void sortPatientsMenu(){
 
 // New method for advanced patient operations
 private void advancedPatientOperations() {
+    
     System.out.println("\n" + Messages.FORMAT);
     System.out.println(" ADVANCED PATIENT OPERATIONS");
     System.out.println(Messages.FORMAT);
-    System.out.println("1. Register Patient with Priority");
-    System.out.println("2. Insert Patient at Specific Position");
-    System.out.println("3. Replace Patient at Position");
-    System.out.println("4. Check if Patient Exists");
-    System.out.println("5. Get Patient Count");
-    System.out.println("6.Search patient by AGE");
-    System.out.println("7.Display patients by Gender");
-    System.out.println("8.Display patients by AGE RANGE");
-    System.out.println("9.Batch UPDATE location (from -> to)");
-    System.out.println("10. Back to Patient Menu");
+    System.out.println("1. Insert Patient at Specific Position");
+    System.out.println("2. Replace Patient at Position");
+    System.out.println("3. Check if Patient Exists");
+    System.out.println("4. Get Patient Count");
+    System.out.println("5.Search patient by AGE");
+    System.out.println("6.Display patients by Gender");
+    System.out.println("7.Display patients by AGE RANGE");
+    System.out.println("8.Batch UPDATE location (from -> to)");
+    System.out.println("9. Back to Patient Menu");
     System.out.print("Enter choice: ");
 
     while (!sc.hasNextInt()) {
@@ -542,39 +548,38 @@ private void advancedPatientOperations() {
     sc.nextLine();
 
     switch (choice) {
+        
         case 1:
-            registerPatientWithPriority();
-            break;
-        case 2:
             insertPatientAtPosition();
             break;
-        case 3:
+        case 2:
             replacePatientAtPosition();
             break;
-        case 4:
+        case 3:
             checkPatientExists();
             break;
-        case 5:
+        case 4:
             System.out.println("Total patients: " + manager.getPatientCount());
             break;
-        case 6:
+        case 5:
             searchPatientByAge();
             break;
-        case 7:
+        case 6:
             displayPatientByGender();
             break;
-        case 8:
+        case 7:
             displayPatientByAgeRange();
             break;
-        case 9:
+        case 8:
             batchChangeLocation();
             break;
-        case 10:
+        case 9:
             System.out.println("Returning to Patient Menu...");
             break;
         default:
             System.out.println("Invalid choice.");
     }
+
 }
 
 
@@ -627,101 +632,7 @@ private void searchPatientByAge(){
         
 }
 
-private void registerPatientWithPriority() {
-    String ic, name, gender, phone, address, email, history;
-    int age, priority;
 
-    // Get patient details (similar to registerPatient but with priority)
-    while(true){
-        System.out.println(Messages.ENTER_PATIENT_IC);
-        ic = sc.nextLine().trim();
-        if (!ic.matches("\\d{12}")) {
-            System.out.println(Messages.INVALID_IC);
-            continue;
-        }
-        if (manager.getPatientByIC(ic) != null) {
-            System.out.println(Messages.DUPLICATE_IC);
-            continue;
-        }
-        break;
-    }
-
-    System.out.print(Messages.ENTER_PATIENT_NAME);
-    name = sc.nextLine();
-
-    while(true){
-        System.out.print(Messages.ENTER_PATIENT_GENDER);
-        gender = sc.nextLine();
-        if(!gender.equalsIgnoreCase("Male") && !gender.equalsIgnoreCase("Female")){
-            System.out.println(Messages.INVALID_INPUT);
-            continue;
-        }
-        break;
-    }
-
-    while(true){
-        System.out.print(Messages.ENTER_PATIENT_AGE);
-        String ageStr = sc.nextLine().trim();
-        try{
-            age = Integer.parseInt(ageStr);
-            if(age <= 0 || age > 120){
-                System.out.println(Messages.INVALID_AGE);
-                continue;
-            }
-            break;
-        }catch(NumberFormatException e){
-            System.out.println(Messages.INVALID_AGE);
-        }
-    }
-
-    while(true){
-        System.out.print(Messages.ENTER_PATIENT_PHONE);
-        phone = sc.nextLine().trim();
-        if(!phone.matches("\\d{12}")){
-            System.out.println(Messages.INVALID_PHONE);
-            continue;
-        }
-        break;
-    }
-
-    System.out.print(Messages.ENTER_PATIENT_ADDRESS);
-    address = sc.nextLine();
-
-    while(true){
-        System.out.print(Messages.ENTER_PATIENT_EMAIL);
-        email = sc.nextLine().trim();
-        if(email.equals("-")){
-            email="";
-            break;
-        }else if(!email.matches("^[\\w.-]+@[\\w.-]+\\.\\w+$")){
-            System.out.println(Messages.INVALID_EMAIL);
-            continue;
-        }
-        break;
-    }
-
-    System.out.print(Messages.ENTER_PATIENT_HISTORY);
-    history = sc.nextLine().trim();
-
-    while(true){
-        System.out.print("Enter priority (1=highest, 5=lowest): ");
-        try{
-            priority = Integer.parseInt(sc.nextLine().trim());
-            if(priority < 1 || priority > 5){
-                System.out.println("Invalid priority. Must be between 1-5.");
-                continue;
-            }
-            break;
-        }catch(NumberFormatException e){
-            System.out.println("Invalid priority. Please enter a number.");
-        }
-    }
-
-    boolean isSuccessful = manager.registerPatientWithPriority(ic, name, gender, age, phone, address, email, history, priority);
-    if(isSuccessful){
-        System.out.println("Patient registered successfully with priority " + priority + ".");
-    }
-}
 
 private void insertPatientAtPosition() {
     System.out.print("Enter position to insert patient: ");
@@ -920,7 +831,7 @@ private void checkPatientExists() {
     Patient patient = manager.getPatientById(id);
     if(patient != null) {
         System.out.println("Patient exists: " + patient.getName());
-        if(manager.containsPatient(patient)) {
+        if(manager.containsId(id)>0) {
             System.out.println("Patient is confirmed to be in the system.");
         }
     } else {
