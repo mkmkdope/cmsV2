@@ -1,3 +1,7 @@
+/**
+ *
+ * @author Angelo Wan Kai Zhe
+ */
 package control;
 
 import dao.TreatmentDAO;
@@ -62,7 +66,7 @@ public class TreatmentManager {
             System.out.println("Available transitions:");
             System.out.println("COMPLETED [when medicine is dispensed]");
             
-            // check if stock is available for COMPLETED transition
+            // check if stock is available for COMPLETED status
             if (canDispenseMedicine(treatmentId)) {
                 System.out.println("Stock Check: Available - can dispense medicine");
         } else {
@@ -77,7 +81,7 @@ public class TreatmentManager {
     }
     
     
-     // check if medicine can be dispensed (stock available)
+     // check if medicine is stock available
     public boolean canDispenseMedicine(String treatmentId) {
         Treatment treatment = getTreatmentById(treatmentId);
         if (treatment == null) {
@@ -207,6 +211,11 @@ public class TreatmentManager {
             return false;
         }
         
+        if(status.equalsIgnoreCase("Pending")){
+            System.out.println("Treatment Status for ID: [" + id + "] is already in Pending");
+            return false;
+        }
+        
         return updateTreatmentStatus(id, status);
     }
     
@@ -285,7 +294,7 @@ public class TreatmentManager {
             return false;
         }
 
-        // PENDING to COMPLETED need to check stock & deduct
+        // PENDING to COMPLETED need to check stock and deduct
         if (currentStatus.equals(STATUS_PENDING) && finalStatus.equals(STATUS_COMPLETED)) {
             Pharmacy medicine = null;
             ListInterface<Pharmacy> allMedicines = pharmacyManager.getAllMedicines();
@@ -322,7 +331,7 @@ public class TreatmentManager {
 
             // show success + billing info
             System.out.println("Treatment " + id + " marked as COMPLETED. Medicine dispensed.");
-            System.out.println("\n PRICE CALCULATION:");
+            System.out.println("\n=== PRICE CALCULATION ===");
             System.out.println("Medicine: " + medicine.getMedName());
             System.out.println("Unit Price: RM " + String.format("%.2f", unitPrice));
             System.out.println("Quantity: " + required + " units");
@@ -361,7 +370,7 @@ public class TreatmentManager {
         }
     }
 
-    // simple sort on the DAO list (by yyyy-MM-dd string compare)
+    // simple sort on the DAO list by date
     public void sortTreatmentsByDate(boolean newestFirst) {
         if (dao.isEmpty()) {
             System.out.println("No treatments to sort.");
@@ -545,12 +554,12 @@ public class TreatmentManager {
         ListInterface<Treatment> treatments = getAllTreatments();
         
         if (treatments.isEmpty()) {
-            System.out.println("                                                                     No treatments found.");
+            System.out.println("                                                        No treatments found.");
             System.out.println("=".repeat(130));
             return;
         }
         
-        System.out.println(" ID     Diagnosis           Prescribed Medicine      Qty    Date         Status      Patient ID   Patient Name     Doctor");
+        System.out.println(" ID     Diagnosis          Prescribed Medicine       Qty    Date         Status      Patient ID   Patient Name     Doctor");
         System.out.println("-".repeat(130));
         
         for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {
@@ -588,12 +597,12 @@ public class TreatmentManager {
         System.out.println("-".repeat(130));
         
         if (treatments.isEmpty()) {
-            System.out.println("                                                                     No treatments found.");
+            System.out.println("                                                        No treatments found.");
             System.out.println("=".repeat(130));
             return;
         }
         
-        System.out.println(" ID     Diagnosis           Prescribed Medicine      Qty    Date         Status      Patient ID   Patient Name     Doctor");
+        System.out.println(" ID     Diagnosis          Prescribed Medicine        Qty    Date         Status      Patient ID   Patient Name     Doctor");
         System.out.println("-".repeat(130));
         
         for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {
@@ -629,7 +638,8 @@ public class TreatmentManager {
         System.out.println("=".repeat(120));
         
         // get patient name work around missing getAllPatients method
-        String patientName = "Unknown";
+        String patientName = "unknown";
+        String patientIC = "unknown";
         // try to get patient name from existing treatments first
         ListInterface<Treatment> treatments = getAllTreatments();
         for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {
@@ -637,16 +647,17 @@ public class TreatmentManager {
             if (t.getConsultation().getPatient() != null && 
                 t.getConsultation().getPatient().getPatientId().equalsIgnoreCase(patientId)) {
                 patientName = t.getConsultation().getPatient().getName();
+                patientIC = t.getConsultation().getPatient().getIcNumber();
                 break;
             }
         }
         
-        System.out.println("Patient ID: " + patientId + " | Patient Name: " + patientName);
+        System.out.println("Patient ID: " + patientId + " | Patient Name: " + patientName + " | Patient IC: " + patientIC);
         System.out.println("-".repeat(120));
         
         boolean found = false;
         
-        System.out.println(" ID     Diagnosis           Prescribed Medicine      Qty    Date         Status      Doctor");
+        System.out.println(" ID     Consultation(ID)   Diagnosis          Prescribed Medicine       Qty    Date         Status      Doctor");
         System.out.println("-".repeat(120));
         
         for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {
@@ -657,8 +668,9 @@ public class TreatmentManager {
                 String doctorName = t.getConsultation().getDoctor() != null ? 
                     t.getConsultation().getDoctor().getName() : "N/A";
                 
-                System.out.printf(" %-6s %-18s %-25s %-6d %-12s %-11s %-16s%n",
+                System.out.printf(" %-6s %-18s %-18s %-25s %-6d %-12s %-11s %-16s%n",
                     t.getTreatmentID(),
+                    t.getConsultation().getConsultationID(),
                     truncateString(t.getDiagnosis(), 18),
                     truncateString(t.getPrescribed(), 25),
                     t.getPrescribedQty(),
@@ -670,7 +682,7 @@ public class TreatmentManager {
         }
         
         if (!found) {
-            System.out.println("                                                                 No treatment history found for this patient.");
+            System.out.println("                                                        No treatment history found for this patient.");
         }
         
         System.out.println("-".repeat(120));
@@ -683,19 +695,18 @@ public class TreatmentManager {
         System.out.println("=".repeat(100));
         
         ListInterface<Treatment> treatments = getAllTreatments();
-        boolean found = false;
+        int total = 0;
         
         // convert input date from DD-MM-YYYY to YYYY-MM-DD format for comparison
         String convertedDate = convertDateToStoredFormat(date);
         
-        System.out.println(" ID     Diagnosis           Prescribed Medicine      Qty    Status      Patient         Doctor");
+        System.out.println(" ID     Diagnosis          Prescribed Medicine       Qty    Status      Patient          Doctor");
         System.out.println("-".repeat(100));
         
         for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {
             Treatment t = treatments.getEntry(i);
             // compare with converted date format
             if (t.getTreatmentDate().equals(convertedDate)) {
-                found = true;
                 String patientName = t.getConsultation().getPatient() != null ? 
                     t.getConsultation().getPatient().getName() : "N/A";
                 String doctorName = t.getConsultation().getDoctor() != null ? 
@@ -710,17 +721,20 @@ public class TreatmentManager {
                     truncateString(patientName, 16),
                     truncateString(doctorName, 16)
                 );
+                total++;
             }
         }
         
-        if (!found) {
-            System.out.println("                                                                 No treatments found for this date.");
-            System.out.println("                                                                 Note: Searching for date: " + convertedDate);
+        if (total > 0) {  
+            System.out.println("-".repeat(100));
+            System.out.println("Total Treatments for " + date + ": " + total);
+            System.out.println("=".repeat(100));
+        }else{
+            System.out.println("                                                        No treatments found for this date.");
+            System.out.println("                                                        Note: Searching for date: " + convertedDate);
+            System.out.println("-".repeat(100));
         }
-        
-        System.out.println("-".repeat(100));
-        System.out.println("Total Treatments for " + date + ": " + (found ? "1" : "0"));
-        System.out.println("=".repeat(100));
+
     }
     
 
@@ -734,7 +748,7 @@ public class TreatmentManager {
             // convert to YYYY-MM-DD format
             return date.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         } catch (Exception e) {
-            // if conversion fails, return original date
+            // if conversion fail, return original date
             return inputDate;
         }
     }
@@ -747,7 +761,7 @@ public class TreatmentManager {
         ListInterface<Treatment> treatments = getAll();
         
         if (treatments.isEmpty()) {
-            System.out.println("                                                                 No treatments found.");
+            System.out.println("                                                        No treatments found.");
             System.out.println("=".repeat(80));
             return;
         }
@@ -773,11 +787,32 @@ public class TreatmentManager {
             }
             
             if (!exists) {
-                // add new diagnosis and count
+                // add new diagnosis anAd count
                 diagNames.add(diagnosis);
                 diagCounts.add(1);
             }
         }
+        
+        // sort by count in descending order
+        for(int i = 1; i <= diagCounts.getNumberOfEntries(); i++){
+            for(int j = i + 1; j <= diagCounts.getNumberOfEntries(); j++){
+                int countI = diagCounts.getEntry(i);
+                int countJ = diagCounts.getEntry(j);
+                
+                if(countI < countJ){
+                    //swapping
+                    diagCounts.replace(i, countJ);
+                    diagCounts.replace(j, countI);
+                    
+                    //diagnosis swapping
+                    String diagI = diagNames.getEntry(i);
+                    String diagJ = diagNames.getEntry(j);
+                    diagNames.replace(i, diagJ);
+                    diagNames.replace(j, diagI);
+                }
+            }
+        }
+        
         
         System.out.println(" Rank   Diagnosis                    Count   Percentage");
         System.out.println("-".repeat(80));
@@ -834,7 +869,7 @@ public class TreatmentManager {
                 System.out.println("\nStatus: " + status + " (" + statusTreatments.getNumberOfEntries() + " treatments)");
                 System.out.println("-".repeat(120));
                 
-                System.out.println(" ID     Diagnosis           Prescribed Medicine      Qty    Date         Patient         Doctor");
+                System.out.println(" ID     Diagnosis          Prescribed Medicine       Qty    Date         Patient          Doctor");
                 System.out.println("-".repeat(120));
                 
                 for (int i = 1; i <= statusTreatments.getNumberOfEntries(); i++) {
@@ -891,7 +926,7 @@ public class TreatmentManager {
         }
         
         if (!found) {
-            System.out.println("                                                                 No treatments found for this consultation.");
+            System.out.println("                                                        No treatments found for this consultation.");
         }
         
         System.out.println("-".repeat(100));
@@ -912,15 +947,20 @@ public class TreatmentManager {
             sortedTreatments.add(treatments.getEntry(i));
         }
         
-        // actually sort the treatments by date
+        // sort by date
         int n = sortedTreatments.getNumberOfEntries();
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j < n; j++) {
                 Treatment t1 = sortedTreatments.getEntry(j);
                 Treatment t2 = sortedTreatments.getEntry(j + 1);
                 
-                // compare dates (YYYY-MM-DD format works with string comparison)
+                // compare date first
                 int cmp = t1.getTreatmentDate().compareTo(t2.getTreatmentDate());
+                
+                if(cmp == 0){
+                    cmp = t1.getTreatmentDate().compareTo(t2.getTreatmentID());
+                }
+                
                 boolean shouldSwap = (ascending && cmp > 0) || (!ascending && cmp < 0);
                 
                 if (shouldSwap) {
@@ -931,14 +971,14 @@ public class TreatmentManager {
             }
         }
         
-        // display the sorted results
+        // display the sorted result
         System.out.println("\n" + "=".repeat(120));
         System.out.println(" SORTED TREATMENTS BY DATE");
         System.out.println("=".repeat(120));
         System.out.println("Sort Order: " + (ascending ? "Oldest First" : "Newest First"));
         System.out.println("-".repeat(120));
         
-        System.out.println(" ID     Diagnosis           Prescribed Medicine      Qty    Date         Status      Patient         Doctor");
+        System.out.println(" ID     Diagnosis          Prescribed Medicine       Qty    Date         Status      Patient          Doctor");
         System.out.println("-".repeat(120));
         
         for (int i = 1; i <= sortedTreatments.getNumberOfEntries(); i++) {
@@ -977,7 +1017,7 @@ public class TreatmentManager {
         System.out.println(" SORTED TREATMENTS BY ID");
         System.out.println("=".repeat(120));
         
-        System.out.println(" ID     Diagnosis           Prescribed Medicine      Qty    Date         Status      Patient         Doctor");
+        System.out.println(" ID     Diagnosis          Prescribed Medicine       Qty    Date         Status      Patient          Doctor");
         System.out.println("-".repeat(120));
         
         for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {

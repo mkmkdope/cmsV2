@@ -1,3 +1,7 @@
+/**
+ *
+ * @author Angelo Wan Kai Zhe
+ */
 package dao;
 
 import adt.CircularDoublyLinkedList;
@@ -11,8 +15,6 @@ import control.DoctorManager;
 import dao.ConsultationDAO;
 
 public class TreatmentDAO {
-    // Make the treatment list shared across the whole app so changes
-    // (like newly added treatments or status updates) are visible everywhere
     private static CircularDoublyLinkedList<Treatment> treatmentList;
     private ListInterface<Consultation> consultations;
     private ConsultationDAO consultationDAO;

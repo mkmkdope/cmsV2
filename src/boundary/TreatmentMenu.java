@@ -1,3 +1,7 @@
+/**
+ *
+ * @author Angelo Wan Kai Zhe
+ */
 package boundary;
 
 import control.TreatmentManager;
@@ -98,7 +102,7 @@ public class TreatmentMenu {
         ListInterface<Treatment> treatments = manager.getAllTreatments();
         ListInterface<Consultation> consultations = manager.getAllConsultations();
         
-        // extract specific consultations from existing treatments
+        // take specific consultations from existing treatments
         for (int i = 1; i <= treatments.getNumberOfEntries(); i++) {
             Treatment t = treatments.getEntry(i);
             if (t.getConsultation() != null) {
@@ -481,7 +485,7 @@ public class TreatmentMenu {
             }
             
             System.out.println("Medicine found: " + foundMedicine.getMedName());
-            return foundMedicine.getMedName(); // return medicine name
+            return foundMedicine.getMedName(); 
         }
     }
 
@@ -606,10 +610,10 @@ public class TreatmentMenu {
                 continue;
             }
             
-            // format validation for Doctor ID (D followed by numbers) - case insensitive
-            if (!did.matches("(?i)D\\d+")) {
-                System.out.println("ERROR: Doctor ID should start with 'D' followed by numbers. Please try again.");
-                System.out.println("Example: D001, d001, D002, d002");
+            // format validation for Doctor ID (D followed by numbers)
+            if (!did.matches("(?i)S\\d+")) {
+                System.out.println("ERROR: Doctor ID should start with 'S' followed by numbers. Please try again.");
+                System.out.println("Example: S001, S002, S003, ...");
                 continue;
             }
             
