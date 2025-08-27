@@ -25,8 +25,8 @@ public class PharmacyMenu {
     private Scanner scanner = new Scanner(System.in);
     private PharmacyManager pharmacyManager;
 
-    public PharmacyMenu() {
-        this.pharmacyManager = new PharmacyManager();
+    public PharmacyMenu(PharmacyManager pharmacyManager) {
+        this.pharmacyManager = pharmacyManager;
         PharmacyReport.setPharmacyManager(pharmacyManager);
     }
 

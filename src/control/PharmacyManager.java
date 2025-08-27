@@ -20,9 +20,10 @@ public class PharmacyManager {
     
     String lineborder ="=".repeat(50);
 
-    private final TreatmentDAO treatmentDAO = new TreatmentDAO();
+    private TreatmentDAO treatmentDAO;
 
-    public PharmacyManager() {
+    public PharmacyManager(TreatmentDAO treatmentDAO) {
+        this.treatmentDAO=treatmentDAO;
     }
 
     public boolean addMedicine(String medName, int medQty, double medPrice, LocalDate expDate) {
