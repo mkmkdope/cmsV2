@@ -1,17 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package adt;
 
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- *
- * @author USER
- */
 public class CircularDoublyLinkedList<T> implements ListInterface<T> {
 
     private class Node {
@@ -351,13 +343,15 @@ public class CircularDoublyLinkedList<T> implements ListInterface<T> {
         return current;
     }
 
-      public int size() {
+    public int size() {
         return size;
     }
-    
+
     public void remove(T item) {
-        if (isEmpty()) return;
-        
+        if (isEmpty()) {
+            return;
+        }
+
         Node current = head;
         for (int i = 0; i < size; i++) {
             if ((item == null && current.data == null) || (item != null && item.equals(current.data))) {
@@ -366,14 +360,125 @@ public class CircularDoublyLinkedList<T> implements ListInterface<T> {
                 } else {
                     current.prev.next = current.next;
                     current.next.prev = current.prev;
-                    if (current == head) head = current.next;
-                    if (current == tail) tail = current.prev;
+                    if (current == head) {
+                        head = current.next;
+                    }
+                    if (current == tail) {
+                        tail = current.prev;
+                    }
                 }
                 size--;
                 return;
             }
             current = current.next;
         }
-    }  
-    
+    }
+
+    //Rotates the list by the specified number of positions. Positive values rotate forward, negative values rotate backward.
+    public void rotate(int steps) {
+        if (isEmpty() || size == 1 || steps % size == 0) {
+            return; // No rotation
+        }
+
+        // Normalize steps to be within [0, size-1]
+        steps = steps % size;
+        if (steps < 0) {
+            steps += size; // Convert negative rotation to positive equivalent
+        }
+
+        // Find the new head node after rotation
+        Node newHead = head;
+        for (int i = 0; i < steps; i++) {
+            newHead = newHead.next;
+        }
+
+        // Update head and tail references
+        head = newHead;
+        tail = newHead.prev; // Since it's circular, the node before newHead becomes new tail
+    }
+
+    //Swaps two nodes at given positions by adjusting their links
+    public void swap(int position1, int position2) {
+        if (position1 == position2) {
+            return; // No swap needed
+        }
+
+        if (position1 < 1 || position1 > size || position2 < 1 || position2 > size) {
+            throw new IndexOutOfBoundsException("Positions must be between 1 and " + size);
+        }
+
+        // Ensure position1 is the smaller index
+        if (position1 > position2) {
+            int temp = position1;
+            position1 = position2;
+            position2 = temp;
+        }
+
+        Node node1 = nodeAt(position1);
+        Node node2 = nodeAt(position2);
+
+        // Special case: adjacent nodes
+        if (node1.next == node2) {
+            swapAdjacentNodes(node1, node2);
+        } else {
+            swapNonAdjacentNodes(node1, node2);
+        }
+    }
+
+// Helper method to swap adjacent nodes
+    private void swapAdjacentNodes(Node node1, Node node2) {
+        Node beforeNode1 = node1.prev;
+        Node afterNode2 = node2.next;
+
+        // Update surrounding nodes
+        beforeNode1.next = node2;
+        afterNode2.prev = node1;
+
+        // Update the nodes being swapped
+        node2.prev = beforeNode1;
+        node2.next = node1;
+        node1.prev = node2;
+        node1.next = afterNode2;
+
+        // Update head/tail references if necessary
+        updateHeadTailAfterSwap(node1, node2);
+    }
+
+// Helper method to swap non-adjacent nodes
+    private void swapNonAdjacentNodes(Node node1, Node node2) {
+        Node beforeNode1 = node1.prev;
+        Node afterNode1 = node1.next;
+        Node beforeNode2 = node2.prev;
+        Node afterNode2 = node2.next;
+
+        // Update surrounding nodes
+        beforeNode1.next = node2;
+        afterNode1.prev = node2;
+        beforeNode2.next = node1;
+        afterNode2.prev = node1;
+
+        // Update the nodes being swapped
+        node2.prev = beforeNode1;
+        node2.next = afterNode1;
+        node1.prev = beforeNode2;
+        node1.next = afterNode2;
+
+        // Update head/tail references if necessary
+        updateHeadTailAfterSwap(node1, node2);
+    }
+
+// Helper method to update head and tail after swap operation
+    private void updateHeadTailAfterSwap(Node node1, Node node2) {
+        if (head == node1) {
+            head = node2;
+        } else if (head == node2) {
+            head = node1;
+        }
+
+        if (tail == node1) {
+            tail = node2;
+        } else if (tail == node2) {
+            tail = node1;
+        }
+    }
 }

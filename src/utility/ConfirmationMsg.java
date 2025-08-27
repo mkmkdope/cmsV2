@@ -2,7 +2,7 @@ package utility;
 
 /**
  *
- * @author ASUS
+ * @author mingkang
  */
 public class ConfirmationMsg {
 
