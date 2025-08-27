@@ -276,7 +276,7 @@ private void updatePatient() {
     break;
 }
 
-    System.out.print(Messages.ENTER_PATIENT_HISTORY + " (Current: " + existing.getMedicalHistory() + ", '-' to keep): ");
+    System.out.print(Messages.REENTER_PATIENT_HISTORY + " (Current: " + existing.getMedicalHistory() + ", '-' to keep): ");
     String history = sc.nextLine().trim();
     if (history.equals("-")) 
     {
