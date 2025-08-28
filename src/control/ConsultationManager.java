@@ -481,10 +481,10 @@ public class ConsultationManager {
 
             switch (choice) {
                 case "1":
-                    updateTime(consultationToUpdate, position);
+                    updateTime(position);
                     break;
                 case "2":
-                    updateStatus(consultationToUpdate, position);
+                    updateStatus(position);
                     break;
                 default:
                     System.out.println("Invalid choice. Please enter 1 or 2 only.");
@@ -506,13 +506,15 @@ public class ConsultationManager {
     }
 
     //update status
-    public void updateStatus(Consultation consultation, int position) {
+    public void updateStatus(int position) {
         System.out.println("");
         System.out.println("== Update Consultation Status ==");
         boolean reenterStatus;
         do {
             reenterStatus = false;
 
+            Consultation consultation = consultationList.getEntry(position);
+            
             String statusChoice = consultationMenu.inputStatusSelection(consultation);
             String newStatus = null;
 
@@ -554,9 +556,11 @@ public class ConsultationManager {
     }
 
     //update time
-    public void updateTime(Consultation consultation, int position) {
+    public void updateTime(int position) {
         System.out.println("");
         System.out.println("== Update Consultation Time ==");
+        
+        Consultation consultation = consultationList.getEntry(position);
 
         //get doctor from existing record
         Doctor currentDoctor = consultation.getDoctor();
@@ -624,7 +628,7 @@ public class ConsultationManager {
                 consultation.getReason()
         );
 
-        updatedConsultation.setStatus(consultation.getStatus());
+        //updatedConsultation.setStatus(consultation.getStatus());
         consultationList.replace(position, updatedConsultation);
 
         System.out.println("Consultation time updated successfully!");
