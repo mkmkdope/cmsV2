@@ -7,7 +7,6 @@ import entity.Doctor;
  *
  * @author Yap Ming Kang
  */
-
 public class DoctorDAO {
 
     private CircularDoublyLinkedList<Doctor> doctorList;
@@ -212,16 +211,15 @@ public void generateDutyReport() {
         }
 
         System.out.println("---------------------------------------------");
-        System.out.println("o = OnDuty, x = OnLeave");
+        System.out.println("o = OnDuty  x = OnLeave");
         System.out.printf("Mon: %d | Tue: %d | Wed: %d | Thu: %d | Fri: %d%n",
                 dayTotals[0], dayTotals[1], dayTotals[2], dayTotals[3], dayTotals[4]);
-        System.out.println("Total Scheduled Duties: " + grandTotal);
-
+        System.out.println("Total Duties: " + grandTotal);
+        System.out.println("Total Doctors: " + doctors.length);
         int availableDoctors = doctors.length - onLeaveCount;
         System.out.println("Doctors available: " + availableDoctors);
         System.out.println("Doctors on Leave: " + onLeaveCount);
-        System.out.println("Total Doctors: " + doctors.length);
-        System.out.println("\n----- End Of Report -----\n");
+        System.out.println("----- End Of Report -----\n");
     }
 
     public Doctor[] getDoctorsSortedById() {
@@ -296,14 +294,13 @@ public void generateWorkloadReport() {
         double averageDuties = doctors.length > 0 ? (double) totalDuties / doctors.length : 0;
 
         System.out.println("-----------------------------------------------------------------------");
-        System.out.println("Workload % = (Individual Duties / Total Duties) * 100%");
+        //System.out.println("Workload % = (Individual Duties / Total Duties) * 100%");
         System.out.printf("Total Duties: %d%n", totalDuties);
-        System.out.printf("Average Duties: %.1f%n", averageDuties);
+        //System.out.printf("Average Duties: %.1f%n", averageDuties);
         System.out.printf("Busiest Doctor: %s (%d duties)%n", busiestDoctor, maxDuties);
 
-        displayWorkloadDistribution(workloads);
-
-        System.out.println("\n----- End of Report -----\n");
+        //displayWorkloadDistribution(workloads);
+        System.out.println("----- End of Report -----\n");
     }
 
     private String generateBarChart(double workloadPercentage, int maxWidth) {
@@ -428,8 +425,8 @@ public void generateWorkloadReport() {
     public void generateSpecialtyReport() {
         System.out.println("\n--- TARUMT CLINIC MANAGEMENT SYSTEM ---");
         System.out.println("----- Specialty Availability Report -----");
-        System.out.println("MON TUE WED THU FRI  SPECIALTY       COVERAGE");
-        System.out.println("---------------------------------------------");
+        System.out.println("MON    TUE    WED    THU    FRI       SPECIALTY         DOCTORS  COVERAGE");
+        System.out.println("----------------------------------------------------------------------------------");
 
         Doctor[] doctors = getAllDoctors();
         String[] specialties = extractUniqueSpecialties(doctors);
@@ -467,7 +464,8 @@ public void generateWorkloadReport() {
             // Display daily coverage symbols
             for (int day = 0; day < DAYS; day++) {
                 String symbol = getCoverageSymbol(summary, day);
-                System.out.print(symbol + "   ");
+                int count = summary.dailyCoverage[day];
+                System.out.printf("%s[%d]   ", symbol, count);
             }
 
             // Calculate coverage percentage
@@ -479,12 +477,14 @@ public void generateWorkloadReport() {
             double coverageRate = totalPossibleSlots > 0
                     ? (double) actualCoverage / totalPossibleSlots * 100 : 0;
 
-            System.out.printf("  %-15s %3.0f%% (%d/%d)%n",
-                    summary.specialty, coverageRate, actualCoverage, totalPossibleSlots);
+            System.out.printf("  %-20s  %-7d %3.0f%%%n",
+                    summary.specialty, summary.totalCount, coverageRate);
+
         }
 
         System.out.println("---------------------------------------------");
-        System.out.println("G = Fully covered  X = Understaffed  / = Partial");
+        System.out.println("G = Fully covered  X = Understaffed  P = Partial");
+        System.out.println("[] = Number of Doctors");
         System.out.println("----- End of Report -----\n");
     }
 
@@ -501,7 +501,7 @@ public void generateWorkloadReport() {
         if (coverageRatio >= 0.8) {
             return "G"; // Good coverage (80-100%)
         } else if (coverageRatio >= 0.4) {
-            return "/"; // Partial coverage (40-79%)
+            return "P"; // Partial coverage (40-79%)
         } else {
             return "X"; // Poor coverage (0-39%)
         }

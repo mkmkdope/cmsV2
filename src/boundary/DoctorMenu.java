@@ -294,7 +294,7 @@ public class DoctorMenu {
             boolean available = false;
 
             do {
-                System.out.print("Set availability (1 for Available, 0 for On Leave): ");
+                System.out.print("Set availability (1 = Available / 0 = On Leave): ");
                 String input = scanner.nextLine().trim();
 
                 if (input.equals("1")) {
@@ -422,7 +422,7 @@ public class DoctorMenu {
 
     private void rotateDoctorList() {
         try {
-            System.out.println("\n=== Rotate Doctor List ===");
+            System.out.println("\n----- Rotate Doctor List -----");
 
             // Show current order
             Doctor[] doctors = doctorManager.getAllDoctors();
@@ -432,7 +432,7 @@ public class DoctorMenu {
                         + " (" + doctors[i].getDoctorId() + ")");
             }
 
-            System.out.print("\nEnter number of positions to rotate (+, -): ");
+            System.out.print("\nEnter number of positions to rotate (+ = forward / - = backward): ");
             int steps = scanner.nextInt();
             scanner.nextLine();
 
@@ -445,7 +445,7 @@ public class DoctorMenu {
     }
 
     private void swapDoctorPositions() {
-        System.out.println("\n=== Swap Doctor Positions ===");
+        System.out.println("\n----- Swap Doctor Positions -----");
 
         // Show current order
         Doctor[] doctors = doctorManager.getAllDoctors();
@@ -464,8 +464,11 @@ public class DoctorMenu {
     }
 
     private void nextCycleReport() {
-        System.out.println("\n=== Next Cycle Duty Schedule Report ===");
-        System.out.println("Displaying projection based on current doctor order...");
+        System.out.println("\n  _   _           _   ");
+        System.out.println(" | \\ | | _____  _| |_ ");
+        System.out.println(" |  \\| |/ _ \\ \\/ / __|");
+        System.out.println(" | |\\  |  __/>  <| |_ ");
+        System.out.println(" |_| \\_|\\___/_/\\_\\\\__|");
         doctorManager.generateNextCycleReport();
     }
 

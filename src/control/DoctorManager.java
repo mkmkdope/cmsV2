@@ -144,10 +144,8 @@ public class DoctorManager {
     }
 
     public void generateNextCycleReport() {
-        System.out.println("\n--- TARUMT CLINIC MANAGEMENT SYSTEM ---");
-        System.out.println("----- Next Cycle Duty Schedule Report ------");
-        System.out.println("Projection Based on Current Doctor Order");
-
+        //System.out.println("\n--- TARUMT CLINIC MANAGEMENT SYSTEM ---");
+        System.out.println("\n--- Next Cycle Duty Schedule Report --->>>>>");
         System.out.println("ID   Name                 Mon Tue Wed Thu Fri Total");
         System.out.println("---------------------------------------------");
 
@@ -209,11 +207,9 @@ public class DoctorManager {
         System.out.println("* = New Duty Cycle");
         System.out.printf("Mon: %d | Tue: %d | Wed: %d | Thu: %d | Fri: %d%n",
                 dayTotals[0], dayTotals[1], dayTotals[2], dayTotals[3], dayTotals[4]);
-        System.out.println("Total Projected Duties: " + grandTotal);
-        System.out.println("Doctors available: " + availableCount);
-        System.out.println("Doctors on Leave: " + (doctors.length - availableCount));
-        System.out.println("Total Doctors: " + doctors.length);
-        System.out.println("\n----- End Of Report -----");
+        //System.out.println("Total Projected Duties: " + grandTotal);
+        //System.out.println("Total Doctors: " + doctors.length);
+        //System.out.println("----- End Of Report -----");
     }
 
 }
