@@ -86,7 +86,6 @@ public class PharmacyReport {
             DispenseRecord r = dispenseHistory.getEntry(i);
             if (r == null) continue;
 
-            // Check if medicine already exists in stock-out list
             boolean found = false;
             for (int j = 1; j <= stockOutList.getNumberOfEntries(); j++) {
                 StockOutRecord existing = stockOutList.getEntry(j);
@@ -240,7 +239,6 @@ public class PharmacyReport {
             for (int i = 1; i <= expiredMedicines.getNumberOfEntries(); i++) {
                 Pharmacy medicine = expiredMedicines.getEntry(i);
             if (medicine != null) {
-                // Use addWithPriority from ADT - longest expired first
                 sortedExpiredList.addWithPriority(new ExpiredDaysComparator(), medicine);
             }
         }
@@ -248,7 +246,6 @@ public class PharmacyReport {
         for (int i = 1; i <= expiringSoonMedicines.getNumberOfEntries(); i++) {
             Pharmacy medicine = expiringSoonMedicines.getEntry(i);
             if (medicine != null) {
-                // Use addWithPriority from ADT - longest days until expiry first
                 sortedExpiringSoonList.addWithPriority(new ExpiringSoonComparator(), medicine);
             }
         }
@@ -313,7 +310,6 @@ public class PharmacyReport {
         } while (choice != 3);
     }
 
-    // Helper classes for sorting
     private static class StockOutRecord {
         String medicineID;
         String medicineName;

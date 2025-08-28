@@ -15,7 +15,6 @@ public class PharmacyDAO {
     private static ListInterface<Pharmacy> medicineList;
     private static int nextMedicineId = 1006;
     
-    // Track stock movements for reporting
     private static int totalStockIn = 0;
     private static int totalStockOut = 0;
     
@@ -25,7 +24,6 @@ public class PharmacyDAO {
     }
     
     private static void initializeSampleData() {
-        //sample medicines
         addMedicine("M1001", "Paracetamol 500mg", 100, 15.50, LocalDate.of(2027, 12, 31));
         addMedicine("M1002", "Amoxicillin 250mg", 50, 25.00, LocalDate.of(2028, 10, 15));
         addMedicine("M1003", "Ibuprofen 400mg", 75, 18.75, LocalDate.of(2025, 9, 20));
