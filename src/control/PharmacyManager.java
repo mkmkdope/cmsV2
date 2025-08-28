@@ -83,15 +83,9 @@ public class PharmacyManager {
             results.add(allMedicines.getEntry(index));
         }
         
-        for (int i = 1; i <= allMedicines.getNumberOfEntries(); i++) {
-            Pharmacy medicine = allMedicines.getEntry(i);
-            if (medicine != null && medicine.getMedID().toLowerCase().contains(id.toLowerCase())) {
-                results.add(medicine);
-            }
-        }
-        
         return results;
     }
+    
     private static class PharmacyNameComparator implements Comparator<Pharmacy> {
         @Override
         public int compare(Pharmacy a, Pharmacy b) {
@@ -149,7 +143,7 @@ public class PharmacyManager {
 
     public ListInterface<Pharmacy> getMedicinesByPriceRange(double minPrice, double maxPrice) {
         ListInterface<Pharmacy> allMedicines = PharmacyDAO.getAllMedicines();
-        adt.CircularDoublyLinkedList<Pharmacy> result = new adt.CircularDoublyLinkedList<>();
+        ListInterface<Pharmacy> result = new adt.CircularDoublyLinkedList<>();
         
         for (int i = 1; i <= allMedicines.getNumberOfEntries(); i++) {
             Pharmacy medicine = allMedicines.getEntry(i);
@@ -172,7 +166,7 @@ public class PharmacyManager {
     }
 
     public ListInterface<Pharmacy> sortMedicines(ListInterface<Pharmacy> medicines, int sortChoice) {
-        adt.CircularDoublyLinkedList<Pharmacy> sortedList = new adt.CircularDoublyLinkedList<>();
+        ListInterface<Pharmacy> sortedList = new adt.CircularDoublyLinkedList<>();
         
         for (int i = 1; i <= medicines.getNumberOfEntries(); i++) {
             sortedList.add(medicines.getEntry(i));
@@ -201,7 +195,7 @@ public class PharmacyManager {
 
     public ListInterface<Treatment> getPendingTreatments() {
         ListInterface<Treatment> allTreatments = treatmentDAO.getAll();
-        adt.CircularDoublyLinkedList<Treatment> pendingTreatments = new adt.CircularDoublyLinkedList<>();
+        ListInterface<Treatment> pendingTreatments = new adt.CircularDoublyLinkedList<>();
         
         for (int i = 1; i <= allTreatments.getNumberOfEntries(); i++) {
             Treatment treatment = allTreatments.getEntry(i);

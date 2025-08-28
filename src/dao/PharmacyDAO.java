@@ -140,7 +140,7 @@ public class PharmacyDAO {
    
     
     public static ListInterface<Pharmacy> getExpiredMedicines() {
-        CircularDoublyLinkedList<Pharmacy> result = new CircularDoublyLinkedList<>();
+        ListInterface<Pharmacy> result = new CircularDoublyLinkedList<>();
         for (int i = 1; i <= medicineList.getNumberOfEntries(); i++) {
             Pharmacy medicine = medicineList.getEntry(i);
             if (medicine != null && medicine.isExpired()) {
@@ -151,7 +151,7 @@ public class PharmacyDAO {
     }
     
     public static ListInterface<Pharmacy> getExpiringSoonMedicines(int daysThreshold) {
-        CircularDoublyLinkedList<Pharmacy> result = new CircularDoublyLinkedList<>();
+        ListInterface<Pharmacy> result = new CircularDoublyLinkedList<>();
         for (int i = 1; i <= medicineList.getNumberOfEntries(); i++) {
             Pharmacy medicine = medicineList.getEntry(i);
             if (medicine != null && medicine.isExpiringSoon(daysThreshold)) {
@@ -162,7 +162,7 @@ public class PharmacyDAO {
     }
     
     public static ListInterface<Pharmacy> getLowStockMedicines(int threshold) {
-        CircularDoublyLinkedList<Pharmacy> result = new CircularDoublyLinkedList<>();
+        ListInterface<Pharmacy> result = new CircularDoublyLinkedList<>();
         for (int i = 1; i <= medicineList.getNumberOfEntries(); i++) {
             Pharmacy medicine = medicineList.getEntry(i);
             if (medicine != null && medicine.getMedQty() <= threshold) {

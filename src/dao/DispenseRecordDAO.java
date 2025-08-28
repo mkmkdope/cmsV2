@@ -43,7 +43,7 @@ public class DispenseRecordDAO {
     }
     
     public static ListInterface<DispenseRecord> getDispenseRecordsByPatient(String patientID) {
-        CircularDoublyLinkedList<DispenseRecord> result = new CircularDoublyLinkedList<>();
+        ListInterface<DispenseRecord> result = new CircularDoublyLinkedList<>();
         for (int i = 1; i <= dispenseRecords.getNumberOfEntries(); i++) {
             DispenseRecord record = dispenseRecords.getEntry(i);
             if (record != null && record.getPatientID().equals(patientID)) {

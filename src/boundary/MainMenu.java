@@ -49,10 +49,10 @@ public class MainMenu {
             System.out.println(Messages.MAIN_MENU_OPTION);
 
             try {
-                System.out.print("Enter the option (1-7): ");
+                System.out.print("Enter the option (1-6): ");
                 choice = Integer.parseInt(scanner.nextLine().trim());
 
-                if (choice >= 1 && choice <= 7) {
+                if (choice >= 1 && choice <= 6) {
 
                     switch (choice) {
                         case 1:
@@ -81,29 +81,26 @@ public class MainMenu {
                             pharmacyMenu.runPharmacyMenu();
                             break;
                         case 6:
-                            System.out.println("\nRedirecting to System Reports...");
-                            // TODO: Implement System Reports functionality
-                            System.out.println("System Reports feature coming soon...");
-                            break;
-                        case 7:
                             System.out.println("\nThank you for using TAR UMT Clinic Management System!");
                             System.out.println("System shutting down...");
                             System.exit(0);
                             break;
+                        case 7:
+                            break;
                     }
 
                 } else {
-                    System.out.printf(Messages.INVALID_CHOICE, 1, 7);
+                    System.out.printf(Messages.INVALID_CHOICE, 1, 6);
                     System.out.println("");
-                    choice = 0; // Force loop to continue
+                    choice = 0; 
                 }
 
             } catch (NumberFormatException e) {
                 System.out.println(Messages.INVALID_INPUT);
-                choice = 0; // Force loop to continue
+                choice = 0; 
             }
 
-            // Add a small pause and clear screen effect before showing menu again
+
             if (choice != 7) {
                 logo();
                 System.out.println(Messages.MAIN_MENU_HEADER);

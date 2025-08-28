@@ -18,10 +18,9 @@ public class Messages {
                    "3. Consultation Management \n" +
                    "4. Medical Treatment Management \n" +
                    "5. Pharmacy Management \n" +
-                   "6. System Report \n" + 
-                   "7. Exit\n\n" +FORMAT;
+                   "6. Exit \n\n"+FORMAT;
 
-    public static final String MAIN_MENU_PROMPT = "\n Please select an option (1-7): ";
+    public static final String MAIN_MENU_PROMPT = "\n Please select an option (1-6): ";
     public static final String INVALID_CHOICE = "Invalid Choice! Please enter a number between the %d - %d.";
 
     public static final String INVALID_NUM = "Invalid Input! Please enter a valid number";

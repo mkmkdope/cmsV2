@@ -78,9 +78,9 @@ public class PharmacyReport {
         ListInterface<Pharmacy> allMedicines = pharmacyManager.getAllMedicines();
         ListInterface<DispenseRecord> dispenseHistory = pharmacyManager.getAllDispenseRecords();
 
-        CircularDoublyLinkedList<StockOutRecord> stockOutList = new CircularDoublyLinkedList<>();
-        CircularDoublyLinkedList<StockInRecord> stockInList = new CircularDoublyLinkedList<>();
-        CircularDoublyLinkedList<Pharmacy> lowStockList = new CircularDoublyLinkedList<>();
+        ListInterface<StockOutRecord> stockOutList = new CircularDoublyLinkedList<>();
+        ListInterface<StockInRecord> stockInList = new CircularDoublyLinkedList<>();
+        ListInterface<Pharmacy> lowStockList = new CircularDoublyLinkedList<>();
 
         for (int i = 1; i <= dispenseHistory.getNumberOfEntries(); i++) {
             DispenseRecord r = dispenseHistory.getEntry(i);
@@ -157,7 +157,7 @@ public class PharmacyReport {
         System.out.printf("%-18s %-15d %-20.2f%n", "Existing", existingQty, existingValue);
         System.out.println("-".repeat(90));
 
-        System.out.println("\nSTOCK IN DETAILS (Highest quantity first)");
+        System.out.println("\nSTOCK IN DETAILS");
         System.out.println("-".repeat(90));
         if (stockInList.isEmpty()) {
             System.out.println("No medicines in inventory.");
@@ -169,6 +169,8 @@ public class PharmacyReport {
                         record.medicineID, record.medicineName, record.quantity, record.totalValue);
             }
         }
+        
+        stockOutList.mergeSort(new StockOutComparator());
         
         System.out.println("\nSTOCK OUT DETAILS");
         System.out.println("-".repeat(90));
@@ -233,8 +235,8 @@ public class PharmacyReport {
         ListInterface<Pharmacy> expiredMedicines = pharmacyManager.getExpiredMedicines();
         ListInterface<Pharmacy> expiringSoonMedicines = pharmacyManager.getExpiringSoonMedicines(daysThreshold);
         
-        CircularDoublyLinkedList<Pharmacy> sortedExpiredList = new CircularDoublyLinkedList<>();
-        CircularDoublyLinkedList<Pharmacy> sortedExpiringSoonList = new CircularDoublyLinkedList<>();
+        ListInterface<Pharmacy> sortedExpiredList = new CircularDoublyLinkedList<>();
+        ListInterface<Pharmacy> sortedExpiringSoonList = new CircularDoublyLinkedList<>();
 
             for (int i = 1; i <= expiredMedicines.getNumberOfEntries(); i++) {
                 Pharmacy medicine = expiredMedicines.getEntry(i);
